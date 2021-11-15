@@ -1,0 +1,217 @@
+<HTML>
+<HEAD>
+<TITLE>Snooping</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: snoop.html 1.5 2014/12/04 23:37:38 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Snooping</h3>
+<h4>Co to je</h4>
+Snooping je schopnost WHDLoad, která ověřuje a loguje CPU přístupy k custom a CIA registrům.
+Pokud je <a href="opt.html#Snoop">Snoop</a> aktivován, všechny nesprávné přístupy k custom
+registrům vytvoří chybu a nainstalovaný program bude ukončen. WHDLoad zobrazí chybový registr
+vysvětlující důvod chyby.
+<h4>Custom registry</h4>
+Všechny přístupy čtení/zápisu do custom registrů jsou kontrolovány. Nesprávné přístupy jsou:
+<ul>
+<li>přístupy k neexistujícím registrům
+<li>read přístupy k Write Only registrům
+<li>write přístupy k Read Only registrům
+<li>přístupy k Early Read registrům
+<li>byte write přístupy (krome <tt>bltcon0l</tt> a <tt>aud*vol+1</tt>)
+</ul>
+Strobe registry mohou být čteny nebo zapisovány.Custom registry se odlišují -
+OCS (Old ChipSet - A500, A1000, old A2000), ECS (Enhanced ChipSet
+- A600, nova A2000, A3000) a AGA (Advanced Graphics - A1200, A4000). Takže se
+tato funkce hodí obzvláště pro hledání chyb ve starých programech, způsobených
+špatným přístupem k AGA registrům.
+<p>Používání funkce <a href="../autodoc.html#resload_Control">resload_Control</a> a tagů
+ <a href="../autodoc.html#WHDLTAG_CUST">WHDLTAG_CUST_DISABLE/READ/STROBE/WRITE</a>
+ se dá modifikovat vnitřní konfigurace WHDLoad toho, které registry mají být
+ jen na čtení/zapisovatelné. Tím mohou být ignorovány ilegální přístupy nebo mohou
+ být detekovány ty správné. To by se mělo používat jen při pracovním procesu a ne
+ ve záverečné verzi slave k vydání.
+<h4>Cia registry</h4>U Cia registrů jsou kontrolovány jen zápisy. To znamená,
+že čtení neexistujících registrů v oblasti paměti od $bfd000 do $bfefff
+nebude detekováno. Pro všechny zápisy bude zapisovaná hodnota interně uložena
+WHDLoadem. Pro některé Cia registry jsou speciální kontroly, které ověřují
+zapisovanou hodnotu:
+
+<p><table border=1 summary="tabulka cia registrů">
+<tr>
+	<th>adresa</th>
+	<th>registr</th>
+	<th>test</th>
+</tr><tr>
+	<td>$bfe001</td>
+	<td>ciaa.ciapra</td>
+	<td>nastavení Overlay bitu #0 je zakázáno</td>
+</tr><tr>
+	<td>$bfe201</td>
+	<td>ciaa.ciaddra</td>
+	<td>bity #6-7 můžou mít jakoukoliv hodnotu (využívá se pro joypad), nižší bity musí být
+	%000011</td>
+</tr><tr>
+	<td>$bfe801</td>
+	<td>ciaa.ciatodlow</td>
+	<td rowspan=3>read-modify-write zápisy (například přes bchg) nejsou dovoleny
+	pokud je nastaven ALARM bit v ciaa.ciacrb (ověřuje se jen na 68060)</td>
+</tr><tr>
+	<td>$bfe901</td>
+	<td>ciaa.ciatodmid</td>
+</tr><tr>
+	<td>$bfea01</td>
+	<td>ciaa.ciatodhi</td>
+</tr><tr>
+	<td>$bfed01</td>
+	<td>ciaa.ciaicr</td>
+	<td>read-modify-write přístupy (například bchg) nejsou dovoleny (ověřováno na 68060)</td>
+</tr><tr>
+	<td>$bfd100</td>
+	<td>ciab.ciaprb</td>
+	<td>bity pro MOTOR #7, SELECT #3-6 a STEP #0 nesmí být vynulovány,
+	ostatní bity mohou být změněny, takhle se detekuje přístup na disk</td>
+</tr><tr>
+	<td>$bfd200</td>
+	<td>ciab.ciaddra</td>
+	<td>zapsaná hodnota musí být %11000000</td>
+</tr><tr>
+	<td>$bfd300</td>
+	<td>ciab.ciaddrb</td>
+	<td>zapsaná hodnota musí být %11111111</td>
+</tr><tr>
+	<td>$bfd800</td>
+	<td>ciab.ciatodlow</td>
+	<td rowspan=3>read-modify-write přístupy (například bchg) nejsou dovoleny,
+	pokud je nastaven ALARM bit v ciab.ciacrb (ověřováno jen na 68060)</td>
+</tr><tr>
+	<td>$bfd900</td>
+	<td>ciab.ciatodmid</td>
+</tr><tr>
+	<td>$bfda00</td>
+	<td>ciab.ciatodhi</td>
+</tr><tr>
+	<td>$bfdd00</td>
+	<td>ciab.ciaicr</td>
+	<td>read-modify-write přístupy (například bchg) nejsou dovoleny (ověřováno jen na 68060)</td>
+</tr></table>
+
+<h4>Jak to funguje</h4>
+Pokud je snooping zapnutý, WHDLoad označí adresy custom registrů v MMU translation
+tree jako nesprávné/chráněné proti zápisu. Díky tomu se každý přístup do custom registrů stane Access Fault
+vyjímkou. WHDload tuto vyjímku ovládá, takže může zjistit, jestli je přístup správný
+nebo ne (při nekorektním přístupu je program ukončen, jinak program pokračuje).
+<br>Kvůli přetížení vyjímek a emulační sekvenci se běh programu značně zpomalí.
+Jak moc, záleží na CPU, typu Chip RAM a stackpointer aligmentu. Vše se take liší
+podle druhu přístupu (Byte/Word/LongWord, Read/Write). Na 68030 jsou zápisy
+rychlejší než čtení (protože při čtení je stackframe 92 bajtu, při psaní 32),
+na 68060 je to naopak, protože emulace zápisu je složitější.
+<h4>Fast Snoop Mode</h4>
+Volba Snoop/S zapíná rychlý snooping. Read přístupy nebudou testovány.
+Žádné speciální zkoušky nejsou provedeny. Tento mód je užitečný jen pro
+získání obsahu custom registru, např. pro uložení obrázku pomocí
+<a href="sp.html">SP</a>.
+<h4>Copper List Scanner</h4>
+Od verze 13 budou zkoušeny také copperlisty. Scanner bude aktivován při zápisu
+do registrů <tt>coplc</tt>, pokud je DMA copperu zapnuto nebo pokud nainstalovaný program
+sám DMA Copperu zapne zápisem do <tt>dmacon</tt> registru. Scanner procházi copperlisty
+a ověřuje všechny move instrukce aplikováním omezení způsobených Snoop volbou.
+Skip a Wait instrukce budou ignorovány.
+Pokud scanner objeví ilegální přístup, program bude ukončen s chybovou hláškou.
+Scanner následuje branche (<tt>copjmp</tt>), detekuje smyčky a zkouší až 16 sublistů.
+Pohyby v copperlistech budou uloženy do interního bufferu pro custom registry a ten
+bude vypsán do souboru při exitu. Scanner není aktivní při Fast Snoop módu.
+
+<h4>Kontrola audio ukazatele</h4>
+Když je aktivovaná volba <a href="opt.html#ChkAudPt">ChkAudPt/S</a>, WHDLoad
+bude kontrolovat, zda nainstalovaný program zapisuje pouze správné adresy
+do ukazatelů pro Custom DMA zvuku. Správné znamená, že ukazatel se musí
+nacházet uvnitř BaseMem a mít jinou hodnotu než 0. Kontrolovány jsou pouze
+zápisove operace longword adres, ne word adres. Tato kontrola může být
+užitečná pro hledání problémů v rutinách pro přehrávání zvuku.
+
+<h4>Zkouška Blitter Priority</h4>
+Když je volba <a href="opt.html#ChkBltHog">ChkBltHog/S</a> aktivována, WHDLoad otestuje, zda instalovaný program
+nezapíná BltHog bit zapsáním do dmacon registru. Priorita blitteru může způsobit
+problémy na některých konfiguracích v souvislosti s rozsáhlými operacemi přes blitter
+(použití všech kanálů).
+<h4>Test velikosti blitter bloku</h4>
+Když je volba <a href="opt.html#ChkBltSize">ChkBltSize/S</a> aktivována, WHDlaod otestuje, zda práce blitteru
+nepřistupuje mimo vyhrazenou paměť. Při zápisu do <tt>bltsize</tt> nebo <tt>bltsizh</tt>
+zkouší, jestli je zapnut řádkový mód - pokud ano, nebude WHDLoad zkoušet velikost bloku.
+Jinak vypočítá WHDLoad první a poslední word pro každý aktivovaný DMA kanál. Pokud
+je adresa mimo BaseMem území, program bude ukončen s requesterem. Kalkulace je navržena
+k práci se všemi módy (ascending/descending, positive/negative modulos, odd
+ modulos/ukazatele).
+<br>Buďte si vědomi toho, že řádkový mód nebude ověřován a že všechny blitter registry
+ mohou být zapsány také copperem, pokud je tak nastaven <tt>copcon</tt>.
+<h4>Blitter Wait test</h4>
+Pokud je volba <a href="opt.html#ChkBltWait">ChkBltWait/S</a> zapnuta, WHDLoad bude sledovat instrukce, aby ověřil,
+že nainstalovaný program korektně čeká na konec blitter operace než začne novou.
+Používá interní hodnotu, která reprezentuje status další blitter operace.
+Hodnota je nastavena při zápisu do <tt>bltsize</tt> nebo <tt>bltsizh</tt>
+a vymazána, když je čten <tt>dmaconr</tt> registr. Při každém kontrolovaném zápisu
+je hodnota testována a pokud je zjištěno, že předchozí blitter operace stále
+běží, program bude ukončen s chybovým registrem s adresou neukončeného blitter
+procesu.
+<br>Jsou tu ale dva nedostatky: použití blitteru přes copperlist není testováno
+a použití blitter přerušení způsobí, že testovací rutina hlásí zbytečné chyby.
+<h4>Kontrola Color Burst</h4>
+Když je aktivovaná volba <a href="opt.html#ChkColBst">ChkColBst/S</a>, WHDLoad
+kontroluje, zda na každém zápisu do <code>custom.bplcon0</code> registru
+je nastaven <code>color</code> bit. Některý hardware, obzvláště flickerfixer
+požaduje, aby byl tento bit nastaven na 1 pro správný výstup video signálu.
+Pro nejlepší kompatibilitu by měl být tento bit vždy nastaven správně.
+Jsou kontrolovány přímé zápisy do <code>custom.bplcon0</code> a zápisy
+skrze copperlisty.
+<h4>Ovládání kontroly Copperu</h4>
+Když je zapnutá volba <a href="opt.html#ChkCopCon">ChkCopCon/S</a>, WHDLoad
+kontroluje, pokud je při každém zápisu do registru <code>custom.copcon</code>,
+není bit #1. Tento bit zapíná schopnost Copperu zapisovat do Blitter registrů.
+Může být někdy užitečné detekovat, zda programy používají Copper pro ovládání
+DMA aktivit.
+<h4>Budoucnost</h4>
+Plánuje se implementovat schopnosti jako Freezing nebo ikonifikace. Pro tohle
+bude Snooping nutnost. Autorům instalaček se doporučuje zkoušet jejich produkty
+se Snoop pro budoucí kompatibilitu.
+<h4>Požadavky</h4>
+Pro Snoop mód je vyžadováno vlastnit MMU, se kterým umí WHDLoad pracovat
+(na 68030 je ho třeba zapnout)
+<h4>Omezeni</h4>
+<ul>
+<li>68020 + 68851
+<ul>
+<li>tento hardware není podporován
+</ul>
+<li>68030
+<ul>
+<li>read-modify-write přístupy do CIA registrů nejsou detekovány
+</ul>
+<li>68040
+<ul>
+<li>read-modify-write zápisy do CIA registrů nejsou detekovány
+<li><tt>movem</tt> instrukce na čtení paměti mohou přistupovat k nesprávným custom registrům
+bez vytvoření vyjímky access fault, to se děje protože jen první zápis bude ověřen
+pro ověření správného registru
+<li>instrukce nesmí přistupovat k víc než jednomu sledovanému registru najednou,
+to znamená, že kód jako <tt>move.b ($dff006),($bfd800)</tt> nemůže být
+ovládán. Pokud se objeví takový kód, WHDLoad vyhodí hlášení Access Fault.
+</ul>
+<li>68060
+<ul>
+<li><tt>movem</tt> instrukce mohou zasahovat nesprávný registr bez chybového
+hlášení (protože je testován jen první přístup)
+<li><tt>move &lt;CIA/Custom registr&gt;,sr</tt> bude vykonán nesprávně, pokud
+se snaží změnit supervisor portion stavového registru, nezmění se.
+<li>any <tt>(ssp)+</tt> or <tt>-(ssp)</tt> ve spojení s write přístupem k
+CIA nebo Custom registru nemůže být převzato kvůli problémům se stackframes,
+WHDLoad takove přístupy detekuje a vyskočí s příslušným requesterem.
+<li>instrukce nesmi přistupovat víc než do jednoho střeženého registru najednou,
+to znamená, že kód jako <tt>move.b ($dff006),($bfd800)</tt> nemůže být zvládnutý
+a způsobí chybu Access Fault.
+</ul>
+</ul>
+</BODY>
+</HTML>

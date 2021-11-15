@@ -1,0 +1,71 @@
+<HTML>
+<HEAD>
+<TITLE>SP * Save Picture</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: sp.html 1.1 2009/01/27 22:32:53 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>SP * Save Picture</h3>
+Et v&aelig;rkt&oslash;j til at hive et billede ud fra <a href="dump.html">dump filen</a> 
+genereret af WHDload.
+<h4>Installation</h4>
+SP er indeholdt i <tt>DEV</tt> arkivet, ikke i <TT>USR</tt> arkivet
+<br>kopi&eacute;r det til C: eller et lignende sted
+<h4>Brug</h4>
+F&oslash;rst skal en dump fil genereres. Start programmet fra hvilket billedet skal 
+rippes. Det skal k&oslash;re med indstillingen <a href="opt.html#Snoop">Snoop/S</a> 
+sl&aring;et til. Ogs&aring; <a href="opt.html#Expert">Expert/S</a> and <a 
+href="opt.html#DebugKey">DebugKey/K/N</a> skal v&aelig;re sl&aring;et til. Hvis billedet 
+du vil rippe viser sig tryk da p&aring; DebugKey'en. WHDLoad vil nu skrive dump 
+filen. G&aring; ind i den folder hvor dump filen ligger ved hj&aelig;lp af en shell. Start 
+nu <tt>SP</tt> med navnet p&aring; den fil med billedet du gerne vil skrive som 
+argument.
+<tt>SP</tt> vil loade dump filen og pr&oslash;ve at gemme billedet.
+<h4>Indstillinger</h4>
+<table>
+<tr>
+  <td colspan=2><tt>OutputFile/A,Cop/K,CS=CopStop/K,Width/K,Height/K,con0/K,mod1/K,mod2/K,pt1/K,pt2/K,pt3/K,pt4/K,NoCopLst/S</tt></td>
+</tr>
+<tr>
+  <td valign=top><tt>OutputFile/A</tt></td>
+  <td>filnavnet p&aring; det billede du vil gemme</td>
+</tr>
+<tr>
+  <td valign=top><tt>Cop/K</tt></td>
+  <td>s&aelig;tter start adressen af den f&oslash;rste copperlist der skal overs&aelig;ttes. Bruges 
+  hvis du gerne vil overskrive adressen i dump filen</td>
+</tr>
+<tr>
+  <td valign=top><tt>CS=CopStop/K</tt></td>
+  <td>denne indstilling specificerer adressen hvor overs&aelig;tteren skal stoppe med at 
+  overs&aelig;tte copperlisten. Den skal bruges hvis sk&aelig;rmen er bygget op af mere end et billede</td>
+</tr>
+<tr>
+  <td valign=top><tt>Width/K</tt></td>
+  <td>specificerer bredden af billedet der skal gemmes. Den vil ikke ber&oslash;re modulo v&aelig;rdierne!</td>
+</tr>
+<tr>
+  <td valign=top><tt>Height/K</tt></td>
+  <td>specificerer h&oslash;jden af det billede der skal gemmes</td>
+</tr>
+<tr>
+  <td valign=top><tt>con0/K</tt></td>
+  <td>overskriver <tt>bplcon0</tt> registret der ligger i dump filen</td>
+</tr>
+<tr>
+  <td valign=top><tt>mod1/K,mod2/K</tt></td>
+  <td>overskriver <tt>bplmod1</tt>/<tt>bplmod2</tt> registret der ligger i dump filen</td>
+</tr>
+<tr>
+  <td valign=top nowrap><tt>pt1/K,pt2/K,pt3/K,pt4/K</tt>&nbsp;&nbsp;</td>
+  <td>overskriver <tt>bplpt1,2,3,4</tt> registret der ligger i dump filen</td>
+</tr>
+<tr>
+  <td valign=top><tt>NoCopLst/S</tt></td>
+  <td>sl&aring;r dumping af copperlist fra</td>
+</tr>
+</table>
+</BODY>
+</HTML>

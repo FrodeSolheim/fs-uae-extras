@@ -1,0 +1,48 @@
+<HTML>
+<HEAD>
+<TITLE>Features</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: feat.html 1.2 2012/10/06 17:36:49 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Muligheder i WHDLoad</h3>
+<ul>
+<li>kan startes via CLI eller Workbench
+<li><a href="mmu.html">Hukommelses beskyttelse</a> med MMU (hvis tilg&aelig;ngeligt)
+<li>returnerer helt rent til OS (Afh&aelig;ngig af slaven)
+<li>Muligt at bruge "disk images" og/eller normale filer
+<li>variabel chip-hukommelses st&oslash;rrelse for det installerede program fra $2000 op til $200000
+<li>uendelig fast-memory st&oslash;rrelse for det installerede program
+<li>intelligent allokering af chip-memory, partiel absolut og partiel uafh&aelig;ngig
+
+<li>caching af filer og disk images ved <a href="opt.html#Preload">startup</a>
+og dynamisk i runtime (LRU)
+
+<li>automatisk decrunching af filer og disk images ved hj&aelig;lp af XPK
+<li>automatisk decrunching af filer hvis Slaven supporterer det (RNC/IMP/TPWM/CRM)
+<li>emulation af MOVE SR,ea fra User-Mode p&aring; 68010+
+<li>emulation af unsupporteret integer-instructioner p&aring; 68060
+
+<li>Avanceret debugging support (<a href="dump.html#memory">memory dump</a>, <a
+href="dump.html#register">register dump</a>, <a href="dump.html#filelog">fil
+tilgahgs logging</a>, <a href="snoop.html">logging af custom register
+tilgang</a>)
+
+<li>Enforcer/Cyberguard og VMM proof s&aring; l&aelig;nge optionen <a
+href="opt.html#NoVBRMove">NoVBRMove/S</a> ikke bruges
+
+</ul>
+<h4>WHDLoad er testet p&aring; de f&oslash;lgende maskiner</h4>
+<ul>
+<li>A1200 BlizzardIV 030/50/50 2 MB Chip 16 MB Fast AGA Kick 39.106
+<li>A2000 GVP 030/25/25 1 MB Chip 1+4 MB Fast ECS Kick 37.175
+<li>A4000 CS 060/50 2 MB Chip 16 MB Fast CV64 Kick 40.068
+<li>A4000 CSPPC 060/50 2 MB Chip 144 MB Fast CV64 Kick 40.068
+<li>x86 Win2k WinUAE 0.8.21r1
+<li>x86 AmigaXL
+<li>og mange flere...
+</ul>
+</BODY>
+</HTML>

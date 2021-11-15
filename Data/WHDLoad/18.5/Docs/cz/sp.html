@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>Ukládání obrázků</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: sp.html 1.4 2014/12/04 23:37:38 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>SP * Save Picture</h3>
+Utilita na vyripování obrázků z <a href="dump.html">dump souboru</a> vytvořenémho
+WHDLoadem.
+<h4>Instalace</h4>
+SP je pouze v <tt>developerském</tt> archivu.
+<br>zkopírujte do C: nebo podobného místa
+<h4>Použití</h4>
+Nejdřív se musí vytvořit dump soubor. Spusťte nainstalovaný program, ze kterého
+má být ripnutý obrázek. Musí být spuštěn se zapnutou volbou <a
+href="opt.html#Snoop">Snoop/S</a>. Také musí být nastaven <a
+href="opt.html#Expert">Expert/S</a> a klávesa pro <a
+href="opt.html#DebugKey">DebugKey/K/N</a>. Až se ukáže obrázek k ripnutí,
+stiskněte DebugKey. WHDLoad zapíše dump soubor. Přes Using Shell/CLI
+vstupte do složky, kde je dump soubor. Spusťte <tt>SP</tt> s názvem
+budoucího souboru jako parametrem.<tt>SP</tt> nahraje dump soubor
+a pokusí se uložit obrázek.
+Jestliže je nastavena volba <a href="opt.html#CoreDumpPath">CoreDumpPath</a>,
+nemusíte vstupovat do složky s dump souborem, protože SP načte globální
+konfigurační soubor a najde si cestu v něm.
+<h4>Volby</h4>
+<table width="100%">
+<tr>
+  <td colspan=2><tt>OutputFile/A,Cop/K,CS=CopStop/K,Width/K,Height/K,con0/K,mod1/K,mod2/K,pt1/K,pt2/K,pt3/K,pt4/K,NoCopLst/S</tt></td>
+</tr>
+<tr>
+  <td valign=top><tt>OutputFile/A</tt></td>
+  <td width="100%">název výsledného souboru</td>
+</tr>
+<tr>
+  <td valign=top><tt>Cop/K</tt></td>
+  <td>nastavuje počáteční adresu prvního copperlistu, pokud vám nevyhovuje původní adresa</td>
+</tr>
+<tr>
+  <td valign=top><tt>CS=CopStop/K</tt></td>
+  <td>tato volba zadává konec copperlistu, hodí se, pokud je obraz stvořený z více než jednoho obrázku</td>
+</tr>
+<tr>
+  <td valign=top><tt>Width/K</tt></td>
+  <td>šířka obrázku, neovlivní ale modulo hodnoty!</td>
+</tr>
+<tr>
+  <td valign=top><tt>Height/K</tt></td>
+  <td>výška obrázku</td>
+</tr>
+<tr>
+  <td valign=top><tt>con0/K</tt></td>
+  <td>přepíše bplcon0 registr uvnitř dumpu</td>
+</tr>
+<tr>
+  <td valign=top><tt>mod1/K,mod2/K</tt></td>
+  <td>přepíše bplmod1/bplmod2 registr uvnitř dumpu</td>
+</tr>
+<tr>
+  <td valign=top nowrap><tt>pt1/K,pt2/K,pt3/K,pt4/K</tt>&nbsp;&nbsp;</td>
+  <td>přepíše bplpt1,2,3,4 registr uvnitř dumpu</td>
+</tr>
+<tr>
+  <td valign=top><tt>NoCopLst/S</tt></td>
+  <td>vypne vypisování copperlistu</td>
+</tr>
+</table>
+</BODY>
+</HTML>

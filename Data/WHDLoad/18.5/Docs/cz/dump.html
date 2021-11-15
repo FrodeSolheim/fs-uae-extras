@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+<TITLE>Výpisy a logy</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: dump.html 1.5 2014/12/04 23:37:38 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Výpisy paměti a logy</h3>
+WHDload umí ukládat paměť a produkovat různé logy, převážně pro odlaďovací účely.
+<h4><a name="memory">Výpis paměti (memory dump)</a></h4>
+Memory dump je celá paměť používaná nainstalovaným programem a zapsaná v daný okamžik
+do souboru. Velikost souboru záleží na nainstalovaném programu (je stejná jako velikost
+<a href="../autodoc.html#ws_BaseMemSize">ws_BaseMemSize</a> ve struktuře slave). Memory dump bude vytvořen, pokud je stlačen
+<a href="opt.html#DebugKey">DebugKey</a> nebo pokud je to požadováno při chybovém
+hlášení. Jméno dump souboru je ".whdl_memory". Standartně se ukládá do "PROGDIR:",
+ale to se dá změnit volbou <a href="opt.html#CoreDumpPath">CoreDumpPath</a>.
+Existující soubor se stejným jménem bude vždycky přepsán bez varování. Pokud nainstalovaný
+program používá dodatečnou přídavnou RAM (<a href="../autodoc.html#ws_ExpMem">ws_ExpMem</a>),
+je tato paměť uložena v dalším souboru ".whdl_expmem".
+<h4><a name="register">Výpis registru (register dump)</a></h4>
+Výpis registru obsahuje kompletní stav CPU, včetně MMU, CIA a custom chipu.
+Některé CIA a custom registr nejsou čitelné, takže jsou obsazeny ve výpisu
+pouze pokud byl aktivní <a href="opt.html#Snoop">Snoop</a> mod. Informace
+budou zapsány do ASCII souboru s použitím highlight efektu (escape sekvence,
+CSI - Control Sequence Introducer, decimální 155). K prohlížení jsou doporučeny
+programy, které escape sekvence podporují (třeba More, MuchMore, Multiview,
+...). Jméno výpisového souboru je ".whdl_register". Standartně se ukládá do "PROGDIR:",
+ale to se může změnit volbou <a href="opt.html#CoreDumpPath">CoreDumpPath</a>.
+Pokud už soubor existuje, bude nový výpis připojen do něj za předchozí výpis.
+<h4><a name="complete">Kompletní výpis paměti</a></h4> Kompletní výpis paměti
+je IFF soubor obsahující obsah všech výše uvedených souborů. Předpokládané
+využití je zamýšleno v jiných programech. Struktura souboru je popsaná v extra include souboru s názvem <tt>whddump.i</tt>.
+V současné době soubor s kompletním výpisem paměti používají aplikace WHDLoadGCI (grafické rozhraní pro programátory) a  <a +href="sp.html">SP</a> (ukládání obrázků). Jméno
+souboru s kompletním výpisem paměti je ".whdl_dump". Standartně je ukládán do "PROGDIR:",
+ale to se může změnit volbou <a href="opt.html#CoreDumpPath">CoreDumpPath</a>. Soubor se stejným jménem bude vždy přepsán novějším.
+<h4><a name="FileLog">FileLog/S</a></h4>
+Všechny přístupy na disk budou logovány, pokud je aktivována volba <a href="opt.html#FileLog">FileLog</a>.
+Tato volba může být užitečná pro analýzu diskových operací nainstalovaného programu,
+pro odlaďování a optimalizační účely. Zápis do logu vytvoří tyto funkce:
+<ul>
+<li><a href="../autodoc.html#resload_DeleteFile">resload_DeleteFile</a>
+<li><a href="../autodoc.html#resload_DiskLoad">resload_DiskLoad</a>
+<li><a href="../autodoc.html#resload_Examine">resload_Examine</a>
+<li><a href="../autodoc.html#resload_ExNext">resload_ExNext</a>
+<li><a href="../autodoc.html#resload_GetFileSize">resload_GetFileSize</a>
+<li><a href="../autodoc.html#resload_GetFileSizeDec">resload_GetFileSizeDec</a>
+<li><a href="../autodoc.html#resload_ListFiles">resload_ListFiles</a>
+<li><a href="../autodoc.html#resload_LoadFile">resload_LoadFile</a>
+<li><a href="../autodoc.html#resload_LoadFileDecrunch">resload_LoadFileDecrunch</a>
+<li><a href="../autodoc.html#resload_LoadFileOffset">resload_LoadFileOffset</a>
+<li><a href="../autodoc.html#resload_SaveFile">resload_SaveFile</a>
+<li><a href="../autodoc.html#resload_SaveFileOffset">resload_SaveFileOffset</a>
+</ul>
+Každý přístup k souboru přes funkce, uvedené výše, vytvoří jednu řádku v logu.
+Řádka identifikuje volanou funkci, CRC čteného/zapisovaného souboru, parametry a výsledek. WHDLoad vytváří log
+ve svém interním <a href="opt.html#LogBuffer">LogBuffer/K/N</a>, buffer bude zapsán při exitu z programu nebo pokud se
+buffer přeplní. Informace se zapíšou do ASCII souboru, jméno logu je
+".whdl_log" (předtím to byl název ".whdl_filelog"). Standartně se ukládá do cesty "PROGDIR:", dá se to ale změnit
+pomocí volby <a href="opt.html#CoreDumppath">CoreDumpPath</a>. Pokud už existuje soubor
+stejného jména, výpis se bude přidávat do něj, jinak je vytvořen úplně nový soubor.
+</BODY>
+</HTML>

@@ -1,0 +1,257 @@
+<HTML>
+<HEAD>
+<TITLE>Programmere WHDLoad</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: howto.html 1.2 2009/02/05 20:38:15 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Schematisk execution flow</h3>
+<p>Den f&oslash;lgende tabel viser program forl&oslash;bet n&aring;r et WHDLoad installeret 
+program bliver eksekveret. Jeg h&aring;ber det hj&aelig;lper til at forst&aring; hvordan 
+WHDLoad fungerer og hvordan WHDLoad, Slaven og det installerede program 
+samarbejder.</p>
+<table cellpadding=3>
+  <tr>
+    <td valign=top>BRUGEREN</td>
+    <td>
+      <ul>
+        <li>Starter demoen eller spillet ved at klikke p&aring; et ikon 
+		eller ved at starte WHDLoad via kommogo linien.
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>Operativ Systemet</td>
+    <td valign=top>
+      <ul>
+        <li>loader den eksekverbare WHDLoad og starter den
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>WHDLoad</td>
+    <td>
+      <ul>
+        <li>kontrollerer software og hardware milj&oslash;et
+        <li>loader og kontrollerer Slaven
+        <li>allokerer den n&oslash;dvendige hukommelse for det installerede program
+        <li>hvis <a href="opt.html#Preload">Preload/S</a> er sl&aring;et til loader den 
+            disk image'erne og filer ind i RAM'en (s&aring; l&aelig;nge der er ledig hukommelse)
+        <li>lukker OS'et ned (sl&aring;r mutitasking og interrupts fra, degraderer
+            graphik hardware til OCS, initialiserer al hardware med definerede v&aelig;rdier)
+        <li>hopper ind i Slaven
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>Slaven</td>
+    <td>
+      <ul>
+        <li>loader det installerede programs hoved programmeved at kalde en
+            WHDLoad funktion (f.eks. <a
+            href="../autodoc.html#resload_DiskLoad">resload_DiskLoad</a> eller <a
+            href="../autodoc.html#resload_LoadFile">resload_LoadFile</a>)
+        <li>patcher hovedprogrammet (s&aring; programmet vil loade dets data via 
+			Slaven, for at fikse kompatibilitets problemer, for at klarg&oslash;re 
+			programmets afslutning)
+        <li>kalder hovedprogrammet
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>Installerede programmer</td>
+    <td>
+      <ul>
+        <li>vil g&oslash;re f&oslash;lgende
+        <li>n&aring;r det loader data fra disken vil det kalde Slaven (fordi Slaven 
+			tidligere har patchet det s&aring;dan), og Slaven
+            vil kalde WHDLoad, og WHDLoad vil delvist sl&aring; OS'et til at loade 
+			data (kun hvis data ikke er <a href="opt.html#Preload">
+			Preload</a>'ed), s&aring; returner, returner og det installerede program 
+			forts&aelig;tter
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>Brugeren</td>
+    <td>
+      <ul>
+        <li>afslutter programmet ved at trykke <a
+            href="opt.html#QuitKey">QuitKey</a>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>Slave</td>
+    <td>
+      <ul>
+        <li>returner til WHDLoad ved at kalde <a
+            href="../autodoc.html#resload_Abort">resload_Abort</a>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>WHDLoad</td>
+    <td>
+      <ul>
+        <li>sl&aring;r OS'et til igen (genskaber hardware registre, display og hukommelse)
+        <li>frigiver alle allokerede ressourcer
+        <li>returnerer til OS'et
+      </ul>
+    </td>
+  </tr>
+</table>
+<h3>S&aring;dan installeres en simpel en disks trackloader</h3>
+Dette er en meget kort step by step guide til hvordan man laver en install ved 
+hj&aelig;lp af WHDLoad. Guiden reflekterer et simpelt eksempel. I den virkelige 
+verden vil s&aring;dan et eksempel h&oslash;jst sogsynligt aldrig opst&aring;. For specialle 
+eksempler og problemer l&aelig;s kapitlerne efter dette.
+<ol>
+  <li>Forberedelse
+    <ul>
+      <li>Lav en folder der skal indeholde alle filerne.
+      <li>Generer et disk image ved hj&aelig;lp af <A HREF="dic.html"> DIC </A> i denne folder.
+      <li>Generer en <a href="opt.html#optwb">#?.info</a> fil med "WHDLoad"
+          som &lt;Default Tool&gt; og en Tooltype "SLAVE=#?" der indeholder navnet p&aring; 
+		  slaven. (eller kopier blot ikonet fra et install eksempel, og sl&aring; alle tooltypes 
+		  fra undtagen "SLAVE=").
+    </ul>
+  <li>Slaven<br>
+    For at skrive slaven skal vi bruge f&oslash;lgende information:
+    <ol>
+      <li>Hvor p&aring; disken ligger hoved applikationen?
+      <li>Hvor i hoved applikationen ligger disk loaderen ?
+    </ol>
+    For at f&aring; denne information m&aring; vi f&oslash;rst analysere bootblocken. For det 
+	meste vil hoved applikationen blive loaded herfra via exec.DoIO(). Nogle 
+	gange vil der v&aelig;re en speciel trackloader i bootblocken. Vi skriver nu en 
+	Slave der vil simulere bootblocken og loade hoved applikationen fra disk 
+	imaget. Nu ripper vi hoved applikationen fra imaget eller et <a
+    href="dump.html#memory">memory dump</a>. Efter dette er vi n&oslash;dt til at 
+	finde loaderen i hoved applikationen. En hurtig m&aring;de at g&oslash;re dette p&aring; er 
+	at s&oslash;ge efter m&oslash;nsteret <tt>$AAAAAAAA</tt> (bruges af MFM decoding) med en 
+	hex-editor. Klip det fundne omr&aring;det ud (+/- <tt>$1000</tt> bytes), disassemble 
+	det, og s&oslash;g efter starten af rutinen. Forst&aring; parameterlisten. Nu skal vi lave 
+	koden til den Slave som vil patche denne loader rutine p&aring; en m&aring;de s&aring; alle 
+	kald redirigeres til Slaven. Slaven vil s&aring; indstille alle parametre og kalde 
+	WHDLoad funktionen <a href="../autodoc.html#resload_DiskLoad">resload_DiskLoad</a>.
+  <li>I det ideelle eksempel er installeren nu f&aelig;rdig.<br>
+	Det sidste der mangler at blive gjort nu er at lave et flot ikon. Rip to 
+	billeder ved hj&aelig;lp af WHDLoads <a href="snoop.html">snoop feature</a> og 
+	<a href="sp.html">SP</a> eller en freezer eller U.A.E. og byg ikonet. Det 
+	anbefales at bruge 16 farvers paletten <a
+	href="ftp://ftp.wustl.edu/pub/aminet/pix/mwb/RomIcons10.lha">RomIcon</a>.
+</ol>
+
+
+
+<h3>Mulige problemer og specielle eksempler</h3>
+<h4>ikke stogard trackloader</h4>
+Nogle programmer bruger deres eget disk format. Dette betyder at <a
+href="dic.html">DIC</a> ikke er istog til at lave disk images. For at lave 
+filer eller images fra s&aring;danne diske anbefales det at bruge <a 
+href="rawdic.html">RawDIC</a>. Se dokumentatione for RawDIC for mere information.
+<h4>Flere disks</h4>
+Hvis programmet bruger mere end &eacute;n disk m&aring; Slaven redirigere disk adgangen 
+til den rigtige image fil. Dette er ikke altid lige nemt. Nogle programmer 
+underst&oslash;tter mere end et drev s&aring; du kan bruge drev nummeret til at v&aelig;lge disken. 
+De fleste programmer bruger et ID p&aring; hver disk til at adskille dem.
+I dette tilf&aelig;lde kan du bruge en variabel der holder disk nummeret og ved hver 
+tilgang til disk ID'et (find s&aring;dan en adgang ved at analysere parametrene for 
+disk loaderen) &oslash;g variablen (hvis den sidste disk n&aring;s s&aring; tr&aelig;k fra). S&aring; vil 
+loaderen forh&aring;bentlig l&aelig;se ID'et igen og igen indtil den korrekte disk bliver 
+sat i. M&aring;ske er der et anmodning til brugeren om at inds&aelig;tte den rigtige disk, 
+sl&aring; den fra.
+<h4>Gemme highscores</h4>
+Der er ikke meget at sige her. Brug <a href="../autodoc.html">
+<a href="../autodoc.html#resload_SaveFile">resload_SaveFile</a></a> til at skrive til det rigtige hukommelses omr&aring;de p&aring; disken. 
+Hvis du vil kan du encrypte det s&aring; lamers ikke s&aring; nemt kan patche det. 
+Det anbefales ikke at skrive direkte ind i et disk image (ved brug af
+<a href="../autodoc.html#resload_SaveFileOffset">resload_SaveFileOffset</a>), for hvis noget 
+g&aring;r galt (f.eks. et crash) er det muligt at imaget vil blive beskadiget.
+<h4>Savegames</h4>
+H&aring;ndtering af savegames sker p&aring; samme m&aring;de som highscores.
+<h4>Adgang til Operativ systemet</h4>
+P&aring; det tidspunkt hvor Slaven og det instalerede program bliver eksekveret 
+eksisterer der absolut intet OS, ingen tilgang til OS eller giver nogen mening 
+at tilg&aring; OS'et! Derfor m&aring; al tilgang som det installerede program fors&oslash;ger sl&aring;s 
+fra. Hvis der ikke er mange af dem eller de ikke giver nogen mening i WHDLoad 
+milj&oslash;et (som f.eks. exec.Disable() eller exec.SuperState()) kan du bare NOP 
+(<tt>$4e71</tt>) dem. Hvis adgangen har en vigtig funktion (som exec.DoIO()), s&aring; 
+rediriger dem til Slaven og emul&eacute;r dem. Hvis der er mange af dem s&aring; lav et simpelt 
+exec.library i en ubrugt del af hukommelsen (initialis&eacute;r longword i adressen 
+<tt>$4</tt>). Du kan kontrollere kilden for Oscar.slaven, som emulerer exec.AllocMem(). 
+For at detektere adgang til OS'et bliver den initialiserende execbase sat til 
+<tt>$f0000001</tt> med henblik p&aring; at alle rutiner som kan lide at bruge execbasen 
+vil lave en "Address Error" exception.<br> Hvis OS funktioner bruges intensivt s&aring; 
+brug en af kickemu pakkerne som kan findes i whdload-dev pakken. Der er en pakke til 
+Kick 1.3 ('src/sources/whdload/kick13.s') og en for Kick 3.1 ('src/sources/whdload/kick31.s').
+Disse pakker kr&aelig;ver et originalt kickstart image og vil lave et komplet OS milj&oslash; inde i 
+WHDLoad omr&aring;det. L&aelig;s ogs&aring; de tilh&oslash;rende readme dokumenter for yderligere information.
+<h3>Generelle kompatibilitets problemer</h3>
+<h4>Begr&aelig;nset addresse plads p&aring; 68000/68010/68ec020</h4>
+P&aring; disse processorer er adresse omr&aring;det begr&aelig;nset til 16 MB (<tt>$000000...$ffffff</tt>)
+ fordi disse CPU'er kun har 24 adresse linier. Et resultat heraf er at al adgang til 
+ h&oslash;jere adresser bliver udf&oslash;rt p&aring; de f&oslash;rste 16 MB ve at ignorere de mest betydende 8 bits.
+ Nogle programmer bruger disse bits til at gemme data, eller glemmer simpelthen at slette 
+ dem. P&aring; en processor med fuldt 4 GB adresse omr&aring;de s&aring;som 68020/680ec30/68030/68040/68060 
+ vil dette ikke virke, fordi den fulde 32-bit adresse vil blive tilg&aring;et.<br>
+For at l&oslash;se dette m&aring; du patche disse tilgange og redirigere dem til den rigtige adresse.<br>
+Nogle gange kan grunden til tilgang til m&aelig;rkelige adresser v&aelig;re en pointer der ikke er 
+initialiseret. I dette tilf&aelig;lde kan det hj&aelig;lpe at slette <tt>$400</tt> - <a href="../autodoc.html#ws_BaseMemSize">ws_BaseMemSize</a>.
+<h4>Forskellige stackframes p&aring; hver processor</h4>
+De stackframes der laves ved interrupts og exceptions er forskellige for medlemmer af 68k 
+familien. P&aring; 68000'ren er en stackframe 6 bytes, undtagen p&aring; Bus og Address Errors. 
+Stackframes indeholder den gemte SR p&aring; (a7) og den gemte PC p&aring; (2,a7). P&aring; alle ogre 
+processorer (68010+) er den minimale stackframe 8 bytes og indeholder yderligere vektor 
+nummeret som et word ved (6,a7). Dette Four-Word stackframe format <tt>$0</tt> bliver 
+genereret for Trap #xx" og Interrupts p&aring; 68010-68060. Ved ogre exceptions er 
+stackframsene forskellige p&aring; hver processor. RTE instruktionerne fungerer forskelligt p&aring; 
+68000'eren mod 68010+. P&aring; en 68000 genskabes SR og PC ganske enkelt og forts&aelig;tter program 
+eksekveringen p&aring; den interrupted addresse. P&aring; 68010+'eren vil den yderlige frig&oslash;re den 
+stackframe der afh&aelig;nger af stackframe formatet. <br>
+Nogle programmer pusher en adresse (PC) og en SR og eksekverer s&aring; en RTE instruktion. 
+Dette fungerer kun p&aring; en 68000. P&aring; 68010+ vil dette resultere i udefinerbare resultater.
+<br>Hvis et program g&oslash;r dette bliver du n&oslash;dt til at rette dette. Nogle gange vil det v&aelig;re 
+nok at erstatte RTE'en med en RTR.
+<h4>MOVEM.x RL,-(An) p&aring; 68000/010 og 68020/030/040</h4>
+Der er en forskel hvis registret der bruges i predecrement mode (RL) ogs&aring; bruges i listen. 
+
+
+
+For 68020, 68030 og 68040'ren er v&aelig;rdien der skrives til hukkommelsen den initielle 
+register v&aelig;rdi minus st&oslash;rrelsen p&aring; operationen. 68000 og 68010'ren skriver den initielle 
+register v&aelig;rdi (uden at tr&aelig;kke noget fra).<br>
+Fordi s&aring;dan en konstruktion ikke er s&aelig;rlig brugbar kendes der ikke til nogen software der 
+har problemer med dette.
+<h3>Generelle guidelines for at skrive installationer</h3>
+<ul>
+<li>Modificer ikke CPU registrene i h&oslash;jere processor s&aring;som VBR eller CACR. VBR'en 
+er altid 0 fra Slave programm&oslash;rens syn, selv hvis den flyttes pga. Auto Vectors 
+(og Traps hvis Flaget <a href="../autodoc.html#WHDL_EmulTrap">WHDL_EmulTrap</a> er sat) 
+er emuleret. Bitsene in CACRen er forskellige for hver processor. Der er kun en m&aring;de 
+&aelig;ndre <a href="cache.html">cachene</a>, brug <a href="../autodoc.html">
+<a href="../autodoc.html#resload_SetCACR">resload_SetCACR</a>/SetCPU</a> og bitdef'sene fra 'exec/execbase.i' og 'whdload.i'. 
+Derudover m&aring; alt i programmet der skal installeres der bruges til at tilg&aring; disse 
+registre sl&aring;s fra eller skippes. Ellers kan WHDLoad ikke fungere korrekt!
+<li>Modificer aldrig disk images. Dette har den fordel at hvis nogen skulle &oslash;nske at 
+starte programmet fra en floppy disk skal han kun skrive imagesne tilbage til en disk 
+(forudsat at programmet k&oslash;rer uden mange fixes, helt klart ikke det mest forekommende).
+<li>Brug aldrig originale ting fra programmet direkte i Slaven (copyright problem).
+<li>Sl&aring; kun Caches til hvis du er sikker p&aring; at det virker p&aring; alle processorer.
+<li>Brug s&aring; lidt hukommelse som muligt til <a href="../autodoc.html#ws_BaseMemSize">ws_BaseMemSize</a>. Nogle mennesker har faste 
+tags i slutningen af Chip hukommelsen, s&aring; det hj&aelig;lper kun at bruge <tt>$1f0000</tt> 
+istedet for <tt>$200000</tt> og WHDLoad kan bruge absolut allokeret hukommelse.
+</ul>
+<h3>Tips &amp; tricks</h3>
+<h4>Er det bedst at bruge disk images eller files ?</h4>
+Nogle gange vil du have mulighed for at bruge disk images eller rigtige filer. 
+Begge dele har sine fordele. Brugen af disk images er oftest det nemmeste og den 
+hurtigste vej til at lave Slaven. Men rigtige filer er nemmere at cache (hvis der 
+er meget lidt hukommelse eller hukommelsen er fragmenteret). Pladsen der beh&oslash;ves 
+p&aring; hardisken bliver ogs&aring; mindre med rigtige filer end med disk images. Du b&oslash;r kun 
+bruge disk images hvis der er mange filer (flere end 30).
+</BODY>
+</HTML>

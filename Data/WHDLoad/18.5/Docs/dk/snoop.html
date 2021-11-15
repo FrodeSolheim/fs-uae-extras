@@ -1,0 +1,205 @@
+<HTML>
+<HEAD>
+<TITLE>Snooping</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: snoop.html 1.2 2012/10/06 17:36:49 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Snooping</h3>
+<h4>Hvad er det</h4> Snooping er en feature i WHDLoad som udf&oslash;rer validering
+og logning af adgang til Custom og Cia registrene. Hvis <a
+href="opt.html#Snoop">Snoop</a> er aktiveret vil al ugyldig adgang generere
+en Access Fault og det installerede program vil blive afsluttet. WHDLoad vil
+vise en requester der fortæller om fejlen.
+
+<h4>Custom registers</h4>Al læse og skrive adgang til custom registrerne
+er verificeret. S&aring;danne adgange er:
+<ul>
+<li>adgang til ikke eksisterende registre
+<li>l&aelig;se adgang til Write Only registre
+<li>skrive adgang til Read Only registre
+<li>adgang til Early Read registre
+<li>byte skrive adgang (undtagen <tt>bltcon0l</tt> og <tt>aud*vol+1</tt>)
+</ul>
+Strobe registre kan l&aelig;ses og skrives. M&aelig;ngden af valid Custom registre kan
+variere mellem OCS (Old ChipSet - A500, A1000, old A2000), ECS (Enhanced ChipSet
+- A600, nye A2000, A3000) og AGA (Advanced Graphics - A1200, A4000). Dette er
+specielt brugbart til at finde bugs i gamle programmer forudsaget af udefineret
+adgang til nye AGA registre.
+
+<h4>Cia registre</h4> På Cia registrer er det kun skrive adgang der verificeres.
+Dette betyder at læse adgang til ikke eksisterende rigistre i hukommelses området
+$bfd000...$bfefff ikke bliver opdaget. For al skrive adgang vil den skrevne værdi
+blive gemt internt af WHDLoad. For nogle Cia registre er der specielle
+kontroller afhængig af den skrevne værdi:
+
+<p><table border=1 summary="tabel over cia registers">
+<tr>
+	<th>addresse</th>
+	<th>register</th>
+	<th>check</th>
+</tr><tr>
+	<td>$bfe001</td>
+	<td>ciaa.ciapra</td>
+	<td>Det er forbudt at sætte Overlay bit #0</td>
+</tr><tr>
+	<td>$bfe201</td>
+	<td>ciaa.ciaddra</td>
+	<td>bitsene #6-7 kan have enhver værdi (bruges til joypad), lavere bits skal være
+	%000011</td>
+</tr><tr>
+	<td>$bfe801</td>
+	<td>ciaa.ciatodlow</td>
+	<td rowspan=3>læse-modificere-skrive adgang (f.eks bchg) er ikke tilladt
+	hvis ALARM bit er sat i ciaa.ciacrb (Kontrolleres kun på 68060)</td>
+</tr><tr>
+	<td>$bfe901</td>
+	<td>ciaa.ciatodmid</td>
+</tr><tr>
+	<td>$bfea01</td>
+	<td>ciaa.ciatodhi</td>
+</tr><tr>
+	<td>$bfed01</td>
+	<td>ciaa.ciaicr</td>
+	<td>læse-modificere-skrive adgang (f.eks. bchg) er ikke tilladt
+	(kontrolleres kun på 68060)</td>
+</tr><tr>
+	<td>$bfd100</td>
+	<td>ciab.ciaprb</td>
+	<td>bitsene for MOTOR #7, SELECT #3-6 og STEP #0 må ikke
+	slettes, andre bits kan ændres; dermed vil al adgang til
+	floppy drevene blive detekteret</td>
+</tr><tr>
+	<td>$bfd200</td>
+	<td>ciab.ciaddra</td>
+	<td>værdien der skrives skal være %11000000</td>
+</tr><tr>
+	<td>$bfd300</td>
+	<td>ciab.ciaddrb</td>
+	<td>værdien der skrives skal være %11111111</td>
+</tr><tr>
+	<td>$bfd800</td>
+	<td>ciab.ciatodlow</td>
+	<td rowspan=3>læse-modificere-skrive adgang (f.eks. bchg) er ikke tilladt
+	hvis ALARM bit er sat i ciab.ciacrb (kontrolleres kun på 68060)</td>
+</tr><tr>
+	<td>$bfd900</td>
+	<td>ciab.ciatodmid</td>
+</tr><tr>
+	<td>$bfda00</td>
+	<td>ciab.ciatodhi</td>
+</tr><tr>
+	<td>$bfdd00</td>
+	<td>ciab.ciaicr</td>
+	<td>læse-modificere-skrive adgang (f.eks. bchg) er ikke tilladt
+	(kontrolleres kun på 68060</td>
+</tr></table>
+
+<h4>Hvordan det virker</h4>
+Hvis Snoop er sl&aring;et til, markerer WHDLoad adresserne af custom og cia registrene som
+ugyldige/skrive-beskyttet i MMU oversættelses træet. P&aring; grund af dette vil enhver adgang til et custom eller cia
+register resultere i en Access Fault exception. Exception handleren i
+WHDLoad h&aring;ndterer denne. F&oslash;rst kontrollerer den om adgangen er gyldig.
+Hvis adgangen er ugyldig bliver programmet afsluttet. Hvis adgangen er gyldig og
+er en l&aelig;se operation vil den blive emuleret og program eksekveringen forts&aelig;tter.
+Hvis det er en skrive operation gemmer WHDLoad yderligere den gemte v&aelig;rdi til et
+internt lager.
+<br>P&aring; grund af overheaded af exceptionen og den emulerede sekvens vil program
+eksekveringen blive langsommere. Hvor meget langsommere den bliver afh&aelig;nger af CPU
+typen, Chip hukommelses typen (16/32-bit) og Stackpointer alignment hvis Chip
+hukommelsen er 32-bit (LongWord aligned eller ikke). Den varierer ogs&aring; for adgangs
+typen (Byte/Word/LongWord, l&aelig;se/Skrive). P&aring; 68030'eren er det hurtigere at Skrive
+end at L&aelig;se (fordi ved l&aelig;sning er stackframen 92 bytes ved skrivning er den 32
+bytes), p&aring; 68060'eren er l&aelig;sning hurtigere fordi emuleringen af skrivning er mere
+komplex.
+
+<h4>Fast Snoop Mode</h4>
+Indstillingen <a href="opt.html#Snoop">Snoop/S</a> sl&aring;r fast snooping til. L&aelig;se
+adgang vil ikke blive kontrolleret. Der bliver ikke udf&oslash;rt nogle specielle checks.
+Denne tilstand er kun brugbar for at hente indhold fra custom registre f.eks. til at
+gemme et billede ved hj&aelig;lp af <a href="sp.html">SP</a>.
+
+<h4>Copper List Scanner</h4>
+Siden version 13 af WHDLoad bliver copperlists og s&aring; selv kontrolleret. Skanneren
+vil blive aktiveret ved skrivninger til <tt>coplc</tt> registret hvis copper dma er
+sl&aring;et til, eller n&aring;r det installerede program sl&aring;r copper dma'et til ved at skrive
+til <tt>dmacon</tt> registret. Skanneren f&oslash;lger copperlisten og validerer all Move
+operationer ved at p&aring;tvinge de restriktioner  der stammer fra Snoop indstillingen
+(OCS/ECS/AGA). Spring over og vent (undtagen CEND) instruktioner vil blive ignoreret.
+N&aring;r den finder ugyldige entries vil det installerede program blive afsluttet.
+Skanneren f&oslash;lger forgreninger (<tt>copjmp</tt>), detekterer loop og kontrollerer op
+til 16 sublister. Flytningerne i copperlisterne vil blive gemt i den interne custom
+register fil som bliver dumpet n&aring;r WHDLoad afslutter. Skanneren er ikke aktiv i Fast
+Snoop tilstanden.
+
+<h4>Blitter Priority Check</h4>
+N&aring;r indstillingen ChkBltHog/S er aktiveret vil WHDLoad kontrollere at det installerede
+program ikke sl&aring;r <tt>BltHog</tt> bit'en til ved at skrive til <tt>dmacon</tt> registret.
+Blitter Priority'en kan skabe problemer p&aring; nogle hardware konfigurationer i forbindelse
+med store blitter operatoner (alle kanaler bruges.
+<h4>Blitter Size Check</h4>
+N&aring;r indstillingen ChkBltSize/S er aktiveret vil WHDLoad kontrollere at blitter job ikke
+tilg&aring;r hukommelse udenfor BaseMem omr&aring;det. Ved skrive adgang til <tt>bltsize</tt> eller
+<tt>bltsizh</tt> kontrollerer den om line tilstanden er aktiveret i <tt>bltcon1</tt>.
+Hvis line tilstanden er aktiv vil den droppe size kontrollen. Ellers vil WHDLoad beregne
+det f&oslash;rste og det sidste word der skal tilg&aring;es for hver aktiveret DMA kanal. Hvis en
+adresse er udenfor BaseMem omr&aring;det vil programmet afslutte med en requester. Beregningen
+er designet til at virke med alle tilstande (stigende/faldende, positive/negative modulos,
+ulige modulos/pointers).
+<br>husk at linie tegnings tilstanden ikke vil blive verificeret og at alle blitter registre
+ogs&aring; kan skrives til af copper hvis <tt>copcon</tt> er sat.
+<h4>Blitter Wait Check</h4>
+N&aring;r indstillingen ChkBltWait/S er aktiveret vil WHDLoad bruge et instructions trace til at
+verificere at det installerede program korrekt venter p&aring; at blitteren afslutter f&oslash;r den
+starter et nyt blitter job. Den bruger en intern variabel som repr&aelig;senterer blitterens
+arbejdende tilstand. Denne variabel bliver sat n&aring;r en skrive adgang til <tt>bltsize</tt>
+eller <tt>bltsizh</tt> h&aelig;nder og t&oslash;mt n&aring;r l&aelig;se adgang til  <tt>dmaconr</tt> registrene
+bliver udf&oslash;rt. Ved hver skrivning til et blitter register bliver v&aelig;rdien af den interne
+variabel kontrolleret. Hvis den indikerer et igangv&aelig;rende blitter job bliver det
+installerede program afsluttet og WHDLoad reportere PC'en og det senest startede blitter
+job sammen med den aktuelle adgang.
+<br>Der er to store flaskehalse ved denne feature. For det f&oslash;rste bliver blitter brug
+gennem copper ikke kontrolleret og for det andet vil brugen af blitter interrupts f&aring;
+kontrol rutinen til at reportere fejl uden at det er n&oslash;dvendigt.
+<h4>Fremtiden</h4>
+Det er planen at implementere features som Freezing og Iconifing.
+For disse er Snoop en essentiel antagelse. Derfor er det anbefalet at insallations
+forfattere kontrollerer deres installation med Snoop for at sikre fremtidige kompatibilitet.
+<h4>Krav</h4>
+Det er n&oslash;dvendigt med en MMU for at kunne bruge Snoop featuren. WHDLoad m&aring; ogs&aring; <a
+href="mmu.html#usercontrol">bruge</a> MMU'en, derfor skal <a href="opt.html#MMU">
+MMU/S</a> sl&aring;s til p&aring; 68030 maskiner.
+<h4>Begr&aelig;nsninger</h4>
+<ul>
+<li>68020 + 68851
+<ul>
+<li>denne hardware er ikke underst&oslash;ttet i &oslash;jeblikket
+</ul>
+<li>68030
+<ul>
+<li>ingen kendte begr&aelig;nsninger
+</ul>
+<li>68040
+<ul>
+<li>denne hardware er ikke underst&oslash;ttet i &oslash;jeblikket
+</ul>
+<li>68060
+<ul>
+<li><tt>movem</tt> instruktioner kan godt f&aring; adgang til et ugyldigt register uden at
+generere en Access Fault exception. Dette er muligt fordi kun den f&oslash;rste adgang vil
+blive verificeret om matcher et gyldigt register
+<li><tt>move &lt;Cia/Custom register&gt;,sr</tt> vil blive eksekveret ukorrekt hvis
+den vil &aelig;ndre overv&aring;gnings delen af status registeret. Overv&aring;gnings delen vil foblive
+u&aelig;ndret
+<li>enhver <tt>(ssp)+</tt> eller <tt>-(ssp)</tt> i forbindelse med en skrive adgang
+til et Cia eller Custom register kan ikke h&aring;ndteres pga stackframe problemer. WHDLoad
+vil opdage s&aring;danne adgange og vil afslutte med en passende requester
+<li>instruktioner m&aring; ikke tilg&aring; mere end &eacute;t snooped register ad gangen. Dette betyder
+at kode som <tt>move.b ($dff006),($bfd800)</tt> ikke kan h&aring;ndteres. Hvis den slags kode
+forekommer vil WHDLoad vise en Access Fault requester
+</ul>
+</ul>
+</BODY>
+</HTML>

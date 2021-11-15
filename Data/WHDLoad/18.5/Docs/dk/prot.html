@@ -1,0 +1,114 @@
+<HTML>
+<HEAD>
+<TITLE>Using resload_Protect#?</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: prot.html 1.2 2009/02/05 20:38:15 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Brug af resload_Protect#?</h3>
+<h4>Teori</h4>
+Der er forskellige situationer i hvilke det kan v&aelig;re meget nyttigt 
+at f&aring; at vide hvorn&aring;r det installerede program tilg&aring;r specifikke 
+hukommelses omr&aring;der. med <a href="../autodoc.html">
+resload_Protect#?</a> funktionen er det muligt at beskytte visse 
+hukommelses omr&aring;der fra processoren at l&aelig;se og/eller skrive. At 
+beskytte betyder at ethvert fors&oslash;g p&aring; at tilg&aring; et beskyttet omr&aring;de 
+vil generere en Access Fault exception som vil resultere i en 
+passende requester af WHDLoad. Hvis du dekl&aelig;rer et hukommelses 
+omr&aring;de som beskyttet v.h.a. <a href="../autodoc.html">
+resload_Protect#?</a> funktionen vil WHDLoad modificere de ber&oslash;rte 
+page descriptors i MMU'ens overs&aelig;ttelses tr&aelig;. Nu vil CPU'en generere 
+en Access Fault exception hver gang et beskyttet omr&aring;de tilg&aring;s. 
+Exception handleren indeni WHDLoad vil verificere grunden til 
+exceptionen. Hvis grunden var et fors&oslash;g p&aring; at tilg&aring; en beskyttet <a 
+href="mmu.html">page</a> men tilgangen ikke matcher det beskyttede 
+omr&aring;de vil tilgangen blive emuleret og den normale program 
+eksekvering vil forts&aelig;tte. Ellers vil WHDLoad afslutte med en passende 
+requester. Hvis adgangen var en adgng til instruktions str&oslash;mmen (f.eks. 
+CPU'en fors&oslash;ger at loade kode) vil den altid blive emuleret, eller med 
+andre ord <a href="../autodoc.html">resload_Protect#?</a> 
+funktionen ber&oslash;rer kun l&aelig;sning og skrivning af data. Det faktum at enhver 
+adgang til en beskyttet side (sidest&oslash;rrelsen er i &oslash;jeblikket $1000) vil 
+generere en access fault, selv hvis det beskyttede omr&aring;de kun har en 
+l&aelig;ngde p&aring; 1 byte, resulterer i et drastisk fald i programmets eksekverings 
+hastighed. Specielt hvis dele af koden ligger p&aring; amme side. Hvis programmet 
+afh&aelig;nger af eksekveringshastighed er der mulighed for afvigelser i 
+eksekveringen. S&aring; det er muligt at nogle programmer ikke vil virke med 
+beskyttelses featuren.
+<h4>Eksempel: checksums over kode</h4>
+Hvis du installerer et program ved brug af WHDLoad er du n&oslash;dt til at patche 
+de originale loader rutiner p&aring; en m&aring;de s&aring; de bruger WHDLoad til at loade spil 
+data. Nogle spil overv&aring;ger nogle kode omr&aring;der med checksum for at kontrollere 
+at koden ikke er modificeret. Disse overv&aring;gnings rutiner kan v&aelig;re sv&aelig;re at 
+finde men ved hj&aelig;lp af <a href="../autodoc.html">resload_Protect#?
+</a> functioner i WHDLoad er der ikke noget der er nemmere end dette. Alt 
+hvad du skal g&oslash;re er at beskytte de bytes du har &aelig;ndret i koden fra at blive 
+l&aelig;st. Nu vil hver rutine der pr&oslash;ver at lave en checksum kontrol og l&aelig;se din 
+patchede kode generere en adgangs fejl. Og du vil vide hvor rutinerne ligger.
+
+
+
+
+<h4>Begr&aelig;nsninger</h4>
+Du m&aring; ikke beskytte den hukommelses side hvor SSP'en peger hen. Hvis du g&oslash;r 
+dette vil det resultere i en Double Bus Fault fordi CPU'en ikke vil v&aelig;re istand 
+til at skrive exception stackframen. Efter en Double Bus Fault er det kun muligt 
+at lave en reset for at forts&aelig;tte eksekveringen. WHDLoad vil kontrollere om der 
+er en konflikt af det beskyttede omr&aring;de og SSP'en og afslutte hvis der er. Men 
+dette vil ikke hj&aelig;lpe hvis SSP'en &aelig;ndrer sig senere hen.
+<ul>
+<li>68020 + 68851
+<ul>
+<li>Denne hardware underst&oslash;ttes ikke i &oslash;jeblikket
+</ul>
+<li>68030
+<ul>
+<li>3-Byte transfers er ikke underst&oslash;ttet og vil generere en real Access Fault,
+s&aring;danne transfers vil opst&aring; hvis et longword p&aring; en ulige addresse p&aring; en sides 
+udkant bliver tilg&aring;et (f.eks. "<code>tst.l ($fff)</code>" hvor siden p&aring; $1000 
+er beskyttet), fordi dette ikke er validt p&aring; en 68000 vil du h&oslash;jst sandsynligt 
+ikke se noget som dette.
+<li>L&aring;ste transfers forudsaget af <code>tas</code>, <code>cas</code> eller 
+<code>cas2</code> er ikke supporteret og vil generere en real Access Fault. 
+Dette er ikke et problem fordi l&aring;ste transfers ikke er supporteret p&aring; Amiga 
+hardware
+</ul>
+<li>68040
+<ul>
+<li>denne hardware er ikke supporteret i &oslash;jeblikket
+</ul>
+<li>68060
+<ul>
+<li>ulige data stream adgang er ikke supporteret og vil generere en real
+Access Fault, en ulige adgange er en adgang der sp&aelig;nder over 2 sider (og 
+mindst &eacute;n af dem er beskyttet). F.eks. "<code>tst.l ($ffe)</code>" ber&oslash;rer 
+siden $0..$fff og siden $1000..$1fff, denne begr&aelig;nsning er et stort problem 
+og kan nogle gange g&oslash;re resload_Protect featuren ubrugelig. M&aring;ske vil jeg 
+pr&oslash;ve at supportere dette senere hen men det er meget vanskeligt.
+<li>ulige instruction stream adgange er ikke supporteret og vil generere en 
+real Access Fault hvis begge sider er beskyttet. En s&aring;dan konstallation 
+skulle v&aelig;re til at undg&aring; 
+<li>l&aring;ste transfers der forudsages af <code>tas</code> eller <code>cas</code> 
+er ikke supporteret og vil generere en real Access Fault. Dette er ikke et 
+problem fordi l&aring;ste transfers alligevel ikke er underst&oslash;ttet af amiga hardware
+<li>instruktioner der ligger p&aring; en beskyttet side (og derfor vil blive emuleret) 
+og som tilg&aring;r overv&aring;gnings delen af status registret vil blive eksekveret ukorrekt. 
+Disse instruktioner vil altid se trace bit'en som 1 og interrupt priority mask som 
+7. Enhver modifikation af overv&aring;gnings delen vil v&aelig;re uden effekt (overv&aring;gnings 
+delen vil bevares u&aelig;ndret)
+<li><code>movem</code> instruktion kan f&aring; adgang til et beskyttet omr&aring;de uden at 
+genererere en Access Fault exception. Dette er muligt fordi kun den f&oslash;rste adgang 
+(word eller longword) vil blive verificeret om det matcher det beskyttede omr&aring;de
+<li><code>move16</code> og dobbel pr&aelig;cisions operationer (FPU) er ikke underst&oslash;ttet 
+og vil generere en real Access Fault
+<li>en "<code>move (mem),(mem)</code>" med overlappende kilde og base addresse som 
+genererer en Access Fault fordi det ikke vil blive eksekveret ordentligt. For eksempel 
+"<code>move.l ($ffc),($ffe)</code>" hvor side $1000..$1fff er beskyttet og hukommelse 
+f&oslash;r eksekvering indeholder ($ffc)=$11112222, ($1000)=$33334444, efter eksekvering 
+indeholder $1000, $11114444 og ikke $22224444
+</ul>
+</ul>
+</BODY>
+</HTML>

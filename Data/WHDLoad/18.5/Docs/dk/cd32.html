@@ -1,0 +1,102 @@
+<HTML>
+<HEAD>
+<TITLE>WHDLoadCD32</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: cd32.html 1.3 2013/11/25 22:13:32 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+
+<h3>WHDLoadCD32</h3>
+
+WHDLoadCD32 er en speciel WHDLoad version som bruges med CD&sup3;&sup2;. Den 
+er optimeret til denne hardware og vil derfor kun k&oslash;re p&aring; en ikke udvidet CD&sup3;&sup2;. 
+Den vil ikke k&oslash;re p&aring; en SX-32 eller nogen som helst anden maskine.
+
+<p>Dette er forskellene til den normale WHDLoad:
+<ul>
+
+<li>Den beh&oslash;ver og bruger ikke en WHDLoad keyfile, derfor kan CD'er med 
+WHDLoadCD32 frit distibueres
+
+<li>Kun 68020 CPU'en er underst&oslash;ttet. Dette betyder ingen MMU underst&oslash;ttelse
+
+<li>fast memory er ikke underst&oslash;ttet
+
+<li>Der er absolut ingen skrive underst&oslash;ttelse, ej heller savegames, highscores eller
+coredumps (en CD er normalt read-only)
+
+<li>Mange ops&aelig;tningsmuligheder er blevet flyttet som ikke er nyttige p&aring; en CD&sup3;&sup2; for
+derved at g&oslash;re den eksekverbare mindre og spare hukommelse, se <a href="opt.html">Brug 
+og ops&aelig;tning</a> for at se hvilke ops&aelig;tningsmulighder det ber&oslash;rer
+
+<li>De f&oslash;lgende resload funktioner er ikke implementeret og brug af dem vil 
+afslutte WHDLoad og returnere TDREASON_ILLEGALARGS:
+
+<ul>
+<li><a href="../autodoc.html#resload_DiskLoadDev">resload_DiskLoadDev</a>
+<li><a href="../autodoc.html#resload_ProtectRead">resload_ProtectRead</a>
+<li><a href="../autodoc.html#resload_ProtectReadWrite">resload_ProtectReadWrite</a>
+<li><a href="../autodoc.html#resload_ProtectWrite">resload_ProtectWrite</a>
+<li><a href="../autodoc.html#resload_ProtectRemove">resload_ProtectRemove</a>
+<li><a href="../autodoc.html#resload_ProtectSMC">resload_ProtectSMC</a>
+</ul>
+
+<li>De f&oslash;lgende resload funktioner er dummies, de vil altid returnere success:
+
+<ul>
+<li><a href="../autodoc.html#resload_SaveFile">resload_SaveFile</a>
+<li><a href="../autodoc.html#resload_SaveFileOffset">resload_SaveFileOffset</a>
+<li><a href="../autodoc.html#resload_DeleteFile">resload_DeleteFile</a>
+</ul>
+
+<li>Der er ingen <a href="freezer.html">freezer/monitor</a> underst&oslash;ttelse bygget ind
+
+<li>Der er ingen intern check for nok stackspace som der er i den normale
+WHDLoad, if&oslash;lge mine test skulle de normale 4096 bytes v&aelig;re nok for WHDLoadCD32
+
+</ul>
+
+<h3>Gode r&aring;d ved brug af WHDLoad p&aring; en CD&sup3;&sup2;</h3>
+
+Det st&oslash;rste problem p&aring; en CD&sup3;&sup2; er den begr&aelig;nsede hukommelse. Der er
+kun 2 MB chip jukommelse. Derfor m&aring; m&aring;let v&aelig;re at frig&oslash;re s&aring; meget hukommelse 
+som muligt til WHDLoad og specielt til Preload operationen. V&aelig;r sikker p&aring; at der ikke 
+k&oslash;rer andre programmer n&aring;r du starter et installeret program med WHDLoadCD32.
+
+<ul>
+
+<li>Hvis insallationen giver valgmuligheden mellem  diskimages og files, brug files. Fordi 
+mange sm&aring; filer lettere kan caches end f&aring; st&oslash;rre filer.
+
+<li>Hvis en installlation tilbyder muligheden for at formindske filerne med ProPack/FImp brug 
+det og formindsk alle filer (RNC1 giver den bedste kompressions ratio). Kompresserde filer 
+beh&oslash;ver mindre hukommelse for Preload og ber&oslash;rer n&aelig;sten ikke load hastigheden.
+
+<li>Brug AllocMemReverse f&oslash;r du k&oslash;rer WHDLoadCD32 (eller en lignendeudskiftning).
+AllocMemReverse er et lille program inkluderet i dev-package af WHDLoad. Den
+patchet exec funktionen AllocMem til altid at bruge MEM_REVERSE til allokeringer. 
+Dette vil vil g&oslash;re at hukommelse bliver allokeret fra toppen til bunden og ikke, som 
+normalt fra bunden til toppen. Og dette vil holde de lavere hukommelses regioner fri. 
+Baggrunden er at WHDLoad beh&oslash;ver hukommelse startende p&aring; adresse 0, starten 
+af chipmem. Al hukommelse der bliver brugt i de nedre regioner skal udskiftes. For 
+denne ekstra hukommelse bliver brugt til at holde den gemte ram. Desto mere hukommelse 
+der bliver brugt i de nedre regioner desto mindre er tilg&aelig;ngeligt for det installerede 
+program og til at preloade data filer.
+
+<li>Brug altid <a href="opt.html#Data">Data</a> muligheden. Preload ved ikke hvilke 
+filer der vil blive loadet af det installerde program, derfor loader den alle filer den kan finde. 
+For at undg&aring; at un&oslash;dvendige filer bliver loaded skal du oprette en folder der kun indeholder 
+de n&oslash;dvendige filer. Slet alle un&oslash;dvendige filer s&aring;som #?.info, #?.Slave, ReadMe, Manual, .... 
+Kald derefter WHDLoad med Slave og Data folder som argument as argument, f.eks. 
+<tt>WHDLoadCD32 :Slaves/XYZ.Slave Data=:Data/XYZ Preload</tt>.
+Det er ikke n&oslash;dvendigt at &aelig;ndre den nuv&aelig;rende folder. 
+
+<li>Brug ikke XPK koimpresserede filer. XPK dekompressering beh&oslash;ver meget hukommelse 
+fordi XPK libraries skal v&aelig;re i hukommelse, dekompression beh&oslash;ver meget hukommelse og 
+dekompression vil for&aring;rsage hukommelses fragmentation.
+
+</ul>
+</BODY>
+</HTML>

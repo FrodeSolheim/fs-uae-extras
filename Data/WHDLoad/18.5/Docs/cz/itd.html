@@ -1,0 +1,69 @@
+<HTML>
+<HEAD>
+<TITLE>Image na Disk</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: itd.html 1.4 2013/11/25 22:13:32 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>ITD * Image na Disk</h3>
+Utilita pro zapsání standartních disk image zpátky na disk.
+<h4>Instalace</h4>
+ITD je pouze v <tt>developerském</tt> archivu, ne v <tt>uživatelském</tt>.
+<br>zkopírujte do C: nebo podobného místa
+<h4>Volby</h4>
+<table>
+<tr><td colspan=2>
+<tt>Soubor/A,Zařízení,Format/S,BS=Velikost bloků/N,ASync/S,ForceOverwriteLargeDevice/S</tt>
+</td></tr><tr><td valign=top>
+<tt>Soubor/A</tt>
+</td><td>
+jméno souboru, který obsahuje obraz disku k zapsání na zařízení
+</td></tr><tr><td valign=top>
+<tt>Zařízení</tt>
+</td><td>
+zařízení, na které ITD zapíše obraz
+<br>standartně "DF0:"
+<br>např. "RAD:"
+</td></tr><tr><td valign=top nowrap>
+<tt>Format/S</tt>
+</td><td>
+pokud je nastaven, disk bude před zapsáním také naformátovám, u většiny zařízení ve výsledku není žádný rozdíl
+</td></tr><tr><td valign=top>
+<tt>Velikost bloků/N</tt>
+</td><td>
+množství dat, co se načte a zapíše při každém cyklu, standartní je velikost stopy.<br>
+Pokud se pracuje s větším zařízením, může zvýšení velikosti bloků zlepšit výkon,
+ale buďte opatrní,<br>protože některá zařízení nefungují správně s velikostí větší
+než 130,560 ($1fe00), někdy dokonce i 65,024 ($fe00)
+</td></tr><tr><td valign=top>
+<tt>ASync/S</tt>
+</td><td>
+pokud je nastaven, ITD zapíše na cílové zařízení asynchron<br>
+Nepoužívejte, pokud je zdrojový soubor a cílové zařízení na stejném
+fyzickém zařízení, protože to zpomalí operaci<br>
+Pokud aspoň jedno z používaných zařízení podporuje DMA,
+významně to vylepší výkon operace kopírování
+</td></tr><tr><td valign=top>
+<tt>ForceOverwriteLargeDevice/S</tt>
+</td><td>
+ITD běžně nebude číst nebo zapisovat na zařízení, která jsou větší než
+2,000,000 bajtů. Použitím této volby bude pracovat s jakoukoliv velikostí
+souborů nebo zařízení
+</td></tr>
+</table>
+<h4>Návratový kód</h4>
+Je 0 při úspěchu, jinak 20.
+<h4>Pozadí</h4>
+ITD může zapisovat na jakékoliv zařízení podobné trackdisku. Aby jsme se vyhnuli
+problémů (např. porušení harddisku), nezapisuje na zařízení větší než 2,000,000 bajtů
+kromě případu, kdy je použitá volba ForceOverwriteLargeDevice/S. Pokud zapisovací
+operace překoná hranici 4GB, použijí se příkazy TrackDisk64.<br>
+Nebude provedena verifikace dat.<br>
+Pokud je obraz menší než zařízení, vypíše se varování. ITD
+nezmění v tomhle případě zbývající stopy, ale zaokrouhlí velikost na plný blok
+a vyčistí přebývající místo. Pokud je obraz větší, vypíše se zpráva a ITD zapíše
+tolik dat, kolik se na zařízení vejde.
+</BODY>
+</HTML>

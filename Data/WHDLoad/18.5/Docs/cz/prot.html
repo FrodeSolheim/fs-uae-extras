@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<TITLE>Používání resload_Protect#?</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: prot.html 1.5 2014/12/04 23:37:38 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Používání resload_Protect#?</h3>
+<h4>Teorie</h4>
+Vyskytnou se různé situace, ve kterých se může hodit být informován o přístupech
+nainstalovaného programu do určitých oblastí paměti. S pomocí funkcí <a href="../autodoc.html">resload_Protect#?</a>
+je možné chránit určité oblasti paměti před čtením anebo zapisovaním procesorem.
+Chránit znamená, že každý přístup do tatko chráněné oblasti vyvolá Access Fault
+vyjímku, která vyústí v chybový requester WHDLoadu. Jestliže označíte oblast paměti
+jako chráněnou použitím <a href="../autodoc.html">resload_Protect#?</a> funkce,
+WHDLoad změní popisy oné oblasti v překladači MMU. Každý přístup k chráněné paměťové stránce (velikost stránky je v současnosti 4096 bajtů)
+vytvoří chybu access fault, i když bude mít chráněná oblast paměti velikost jen jednoho bajtu.
+Výsledkem používání funkce je silné zpomalení běhu programu. Obzvláště pokud jsou části kódu
+v chráněné stránce. Pokud program na rychlosti běhu závisí, můžou se vyskytnout odlišnosti
+v tom, co program dělá. Některé programy tak nemusí s ochranou paměti přes resload_Protect fungovat.
+
+<h4>Příklad: checksums kódu</h4>
+Pokud instalujete hru pomocí WHDLoad, budete muset patchnout původní loader
+ve hře tak, aby program nahrával přes WHDLoad. Některé hry provádějí kontrolní
+součet klíčových oblastí programu, aby detekovaly změny původního kódu. Tyto
+rutiny může být někdy těžké najít. Ale použití <a href="../autodoc.html">resload_Protect#?</a> funkcí
+hledání usnadňuje. Všechno, co musíte udělat, je chránit bajty, které jste
+změnili v kódu hry před přečtením. Pak každá rutina, která se pokouší přečíst
+váš opravený kód způsobí chybu a vy zjistíte, kde kontrola je.
+<h4>Omezení</h4>
+Nesmíte chránit paměť, kde je SSP. Pokud to uděláte a stane se vyjímka, dojde
+k dvojité chybě na sběrnici, protože CPU nebude schopné zapsat stackframe vyjímky.
+Poté už se dá program jen resetnout. WHDLoad ověřuje konflikt chráněné paměti se SSP a ukončí se, pokud takový stav
+nastane. Tohle ale nepomáhá, pokud se později SSP změní.
+
+<p>Pro víc omezení a informací si prosím přečtětě soubor Autodoc na téma
+různých funkcí resload_Protect.
+<li><a href="../autodoc.html#resload_ProtectRead">resload_ProtectRead</a>
+<li><a href="../autodoc.html#resload_ProtectReadWrite">resload_ProtectReadWrite</a>
+<li><a href="../autodoc.html#resload_ProtectRemove">resload_ProtectRemove</a>
+<li><a href="../autodoc.html#resload_ProtectSMC">resload_ProtectSMC</a>
+<li><a href="../autodoc.html#resload_ProtectWrite">resload_ProtectWrite</a>
+</ul>
+</BODY>
+</HTML>

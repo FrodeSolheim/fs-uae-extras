@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+<TITLE>ITD * Image To Disk</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: itd.html 1.2 2013/11/25 22:13:32 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>ITD * Image To Disk</h3>
+V&aelig;rkt&oslash;j til at skrive images tilbage til en floppy agtigt enhed.
+<h4>Installation</h4>
+ITD er kun indeholdt i <tt>DEV</tt> arkivet, ikke i <TT>USR</tt>
+arkivet. <br>Kopi&eacute;r der til C: eller et lignende sted
+<h4>Options</h4>
+<table>
+<tr><td colspan=2>
+<tt>File/A,Device,Format/S,BS=BlockSize/N,ASync/S,ForceOverwriteLargeDevice/S</tt>
+</td></tr>
+<tr><td valign=top>
+<tt>FILE/A</tt>
+</td><td>
+Navnet p&aring; den fil der indeholder disk image der skal skrives til devicet.
+</td></tr><tr><td valign=top>
+<tt>Device</tt>
+</td></tr>
+<tr><td valign=top>
+<tt>DEVICE</tt>
+</td><td>
+den enhed ITD vil skrive image til
+<br>default "DF0:"
+<br>eksempel "RAD:"
+</td></tr><tr><td valign=top nowrap>
+<tt>Format/S</tt>
+</td><td>
+Hvis denne er sl&aring;et til, vil disken ogs&aring; blive formatteret n&aring;r der skrives. For de fleste devices vil dette 
+ikke have nogen betydning.
+</td></tr><tr><td valign=top>
+<tt>BlockSize/N</tt>
+</td><td>
+M&aelig;ngden af data der l&aelig;ses og skrives ved hver cycle. Det normale er st&oslash;rrelsen
+p&aring; et track (BlocksPerTrack*SizeBlock)<br>
+Hvis der arbejdes p&aring; st&oslash;rre devices kan det &oslash;ge performance at bruge st&oslash;rre blok
+st&oslash;rrelser, men v&aelig;r opm&aelig;rksom p&aring; at nogle devices ikke virker korrekt ved blokke st&oslash;rre 
+end 130,560 ($1fe00) eller pr&aelig;cis 65,024 ($fe00)
+</td></tr><tr><td valign=top>
+<tt>ASync/S</tt>
+</td><td>
+Hvis dette er sl&aring;et til vil ITD skrive asynkront til destinations devicet.<br>
+Brug ikke hvis kilde filen og destinations devicet er p&aring; det samme fysiske device, 
+for det vil sl&oslash;ve operationen.<br>
+Hvis mindst en af kilde filerne og destinations device underst&oslash;tter DMA vil det 
+&oslash;ge performance p&aring; kopierings operationer markant.
+</td></tr><tr><td valign=top>
+<tt>ForceOverwriteLargeDevice/S</tt>
+</td><td>
+Normalt vil ITD ikke l&aelig;se fra filer eller skrive til devices der er st&oslash;rre
+end 2,000,000 bytes. Ved at bruge denne switch vil den virke p&aring; filer og devices 
+pa enhver st&oslash;rrelse.
+</td></tr>
+</table>
+<h4>Return code</h4>
+S&aelig;t til 0 ved succes ellers 20.
+<h4>Baggrund</h4>
+ITD kan skrive til en hvilken som helst tracjdisk agtig enhed. For at undg&aring; problemer (f.eks. &oslash;del&aelig;gge 
+din harddisk) skriver den ikke til enheder st&oslash;rre end 2,000,000 bytes med mindre 
+valgmuligheden ForceOverwriteLargeDevice/S bliver brugt. Hvis skrive operationen vil g&aring; ud over 
+4 GB gr&aelig;nsen vil den bruge TrackDisk64 kommandoer.<br>
+Der vil IKKE blive verificeret.<br>
+Hvis image er mindre end devices vil du f&aring; en advarsel. ITD
+vil, i dette tilf&aelig;lde, ikke &aelig;ndre de tilbagev&aelig;rende tracks men vil runde op til 
+en fuld blok og fjerne alle mellemrum efter. Hvis image er st&oslash;rre vil du ogs&aring; 
+modtage en beskedog ITD vil skrive s&aring; meget data der kan v&aelig;re p&aring; devicet.
+</BODY>
+</HTML>

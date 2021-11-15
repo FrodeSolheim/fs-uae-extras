@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+<TITLE>FindAccess * Find Accesses</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: fa.html 1.2 2013/11/25 22:13:32 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>FindAccess * Find adgang til en hukkomelses lokation</h3>
+Dette v&aelig;rkt&oslash;j vil hente den specificerede fil og scanne den for tilgang til 
+en given adresse. Det vil finde alle absolutte og relative 8-bit, 16-bit 
+og 32-bit referencer. Det blev skrevet for at analysere coredump filer. Det 
+er magen til Freezer komandoen FA men vil ikke disassemble adgangen men vise 
+den som en ren hex dump.
+<h4>Installation</h4>
+FindAccess er kun indeholdt i <tt>DEV</tt> arkivet, ikke i 
+<TT>USR</tt> arkivet <br>kopier den til C: eller et lignende sted.
+<h4>Brug</h4>
+Jeg bruger det f&oslash;lgende alias (tilf&oslash;jet til min S:Shell-Startup) til at s&oslash;ge 
+i den sidste memory dump der bliver skrevet af whdload:
+<p><tt>alias fa FindAccess C:.whdl_memory</tt></p>
+s&aring; jeg kan &aring;bne en shell og eksempelvis skrive:
+<p><tt>fa $15000</tt></p>
+og vil f&aring; det f&oslash;lgende output:
+<p><tt>FindAccess 1.2 (17-Jan-99 14:45:18) by Bert Jahn
+<br>loading file <B>Workbench:CE/.whdl_memory</B>
+<br>scanning accesses to $15000 (86016)  file: $0-$80000
+<br>Relative  Word at $ 14240 -> 06C00000 07C00000 <B>0DC0</B> 00000CC0 000004C0
+</tt></p>
+<h4>Muligheder</h4>
+<table>
+<tr><td colspan=2>
+<tt>FILE/A,ADDRESS/A,ORG</tt>
+</td></tr>
+<tr><td valign=top>
+<tt>FILE/A</tt>
+</td><td>
+Navnet p&aring; filen der skal scannes
+</td></tr>
+<tr><td valign=top nowrap>
+<tt>ADDRESS/A</tt>&nbsp;&nbsp;
+</td><td>
+adgangs adressen du s&oslash;ger efter. Du kan bruge simple forkortelser s&aring;som "$5000"
+= "20480" = " -$Ff +-33+ 19512+$4e8" (prefix "$" for hexadecimal numre,
+underst&oslash;ttede operatorer er "+" og "-", unary og bin&aelig;re)
+</td></tr>
+<tr><td valign=top>
+<tt>ORG</tt>
+</td><td>
+filens logiske start adresse, hvis den ikke er angivet bruges $0, du kan 
+bruge simple forkortelser som med ADDRESS/A
+</td></tr>
+</table>
+</BODY>
+</HTML>

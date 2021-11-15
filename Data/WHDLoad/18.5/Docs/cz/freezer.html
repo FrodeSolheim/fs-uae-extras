@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<TITLE>Monitory/Freezery systému</TITLE>
+<meta name="DC.Language" content="cz">
+<meta http-equiv="content-language" content="cz">
+<meta http-equiv="content-type" content="text/html; charset=windows-1250">
+<!-- $Id: freezer.html 1.6 2014/12/04 23:37:38 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Monitory/Freezery systému</h3>
+Existuje řada softwarových freezerů. Použití těchto programů se hodí k výrobě
+a odlaďování slavu a instalovaných programů. WHDLoad přímo podporuje HRTMon a ThrillKill.
+Ostatní programy mohou být použity přes volbu <a href="opt.html#NoTrapHandler">NoTrapHandler/S</a>
+(ale to má pár nevýhod, samozřejmě). Jestli chcete přímou podporu pro nějaký jiný
+freezer, můžete mě kontaktovat a pokud jsem toho schopen, přidám pro freezer podporu.
+Na začátku WHDLoad zkouší, jestli je některý z podporovaných monitorů aktivní.
+Pokud nějaký detekuje, koná pár zvláštních úprav - zapíná paměť používanou freezerem
+jako korektní. Během běhu dema/hry přesune všechny NMI vyjímky na NMI vektor,
+převzatý z tabulek freezeru. Pokud WHDLoad přesunoval VBR (tzn. <a href="opt.html#NoVBRMove">NoVBRMove/S</a> není nastavena a CPU je aspoň 68010),
+testuje hodnotu ve <a href="opt.html#FreezeKey">"FreezeKey"</a>. Jestliže je klávesa
+stisknuta, WHDLoad uvědomí klávesnici, přemění stackframe do NMI stackframe
+a vstoupí do monitoru přes jeho NMI handler.
+
+<h4>HRTMon</h4>
+Detekce v paměti by měla být bezpečná obzvláště s novými verzemi monioru, protože
+do monitorů byl přidán nový "podpis". Buďte opatrní, pokud WHDLoad používá MMU, nepřistupujte
+z HRTmonu mimo hranice paměti stanovené BaseMem/ExpMem. Způsobí to seknutí
+programu, protože HRTmon nezvládne výslednou vyjímku Access Fault.
+<p>V preferencích (HRTmonPrefs) musíte zatrhnout položku 'No VBR move', jinak
+nebude možné aktivovat monitor po spuštění WHDLoad.
+<p>Po návratu z aktivovaného HRTmonu do programu běžícího pod WHDLoad si můžete
+všimnout, že grafika není zobrazovaná správně. HRTmon totiž přepisuje některé
+custom registry. Můžete tenhle problém obejít opětovným zadáním správné hodnoty
+v HRTmonu, např. použít <tt>'e $100 $5200'</tt> pro 32barevnou obrazovku předtím
+než z HRTmonu vyskočíte.
+<p>HRTmon vestavěný do WinUAE může být detekován jen pokud byl HRTMon předtím
+aktivován už předtím aspoň jednou (přes klávesu PgUp). Tohle je případ,
+kdy nebude NMI vector nastaven do první aktivace (což je požadováno
+WHDLoadem, aby byl monitor nalezen.
+<p>Existují novější verze HRTMonu, které přidávají speciální příkazy při spouštění
+pod WHDLoad. Takže můžete nahrávat/ukládat soubory a používat <a href="prot.html">resload_Protect#?</a> funkce i uvnitř HRTMonu.
+Tyto verze lze stáhnout z <a href="http://www.whdload.de/whdload/Tools/">WHDLoad stránek</a>.
+<h4>ThrillKill</h4>
+Tento freezer nemá žádnou použitelnou signaturu, takže WHDLoad zkouší kód.
+Tato detekce nebude fungovat s novějšími verzemi.
+</BODY>
+</HTML>

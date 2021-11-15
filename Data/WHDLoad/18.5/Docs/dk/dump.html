@@ -1,0 +1,74 @@
+<HTML>
+<HEAD>
+<TITLE>Dumping</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: dump.html 1.2 2009/02/05 20:38:15 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>WHDLoad's dump and logfiler</h3>
+Hovedsagligt til debbuging kan WHDLoad generere diverse dump og logfiler.
+<h4><a name="memory">Memory dump</a></h4>
+Ved et memory dump bliver al den hukommelse, et installeret program bruger, 
+skrevet til en fil. St&oslash;rrelsen af dump'et afh&aelig;nger af det installerede program 
+(som er st&oslash;rrelsen af <a href="../autodoc.html#ws_BaseMemSize">ws_BaseMemSize</a> i slave folderen). Et memory dump vil 
+blive genereret hvis <a href="opt.html#DebugKey">Debug tasten</a> bliver 
+trykket eller hvis CoreDump knappen bliver trykket efter en fejl. Navnet 
+p&aring; memory dump filen er ".whdl_memory". Standard placeringen er "PROGDIR:" 
+men kan &aelig;ndres vha. <a href="opt.html#CoreDumpPath">CoreDumpPath</a> 
+ops&aelig;tningsmuligheden. En eksisterende fil med det samme navn vil altid 
+blive overskrevet. Hvis det installerede program bruger yderligere 
+Fast-Memory gemmes det under filnavnet ".whdl_expmem".
+<h4><a name="register">Register dump</a></h4>
+Register dumpet indeholder den absolutte status af CPU (inklusiv MMU), Cia 
+og special chipsene. Nogle Cia og special registre er ikke l&aelig;sbare. Disse er
+kun inkluderet i dump filen hvis <a href="opt.html#Snoop">Snoop</a> tilstand 
+var aktiv. Informationen vil blive skrevet til en ASCII fil med fremh&aelig;vninger 
+lavet via escape sekvenser (ved at bruge CSI - Control Sequence Introducer, 
+decimal 155). For at se filen anbefales det at bruge et program der underst&oslash;tter 
+escape sekvenser (f.eks. More, MuchMore, MultiView, ...). Navnet p&aring; dump filen
+er ".whdl_register", standard lokationen er "PROGDIR:" men kan &aelig;ndres v.h.a. 
+<a href="opt.html#CoreDumppath">CoreDumpPath</a> ops&aelig;tningen. Hvis der allederede 
+findes en fil med det samme navn vil dump'et blive skrevet til slutningen af 
+filen - ellers vil en ny fil blive oprettet.
+
+<h4><a name="complete">Komplet dump fil</a></h4> Den komplette dump fil er en 
+IFF fil der indeholder alle tidligere dump filers informationer. Den er beregnet 
+til at blive brugt af andre applikationer. Filens struktur er beskrevet i 
+en ekstra inkluderet fil kaldet <tt>whddump.i</tt>. På nuværende tidspunkt 
+læser applikationerne WHDLoadGCI (graphical coders interface) og <a href="sp.html">SP</a> 
+(save picture) hele dump filen. Navnet på den komplette dump fil der genereres 
+er ".whdl_dump". Standard lokationen er "PROGDIR:" men kan ændres med 
+indstillingen <a href="opt.html#CoreDumpPath">CoreDumpPath</a>. En eksisterende fil 
+vil altid blive overskrevet.
+
+<h4><a name="FileLog">Fil tilgangs log</a></h4>
+Al tilgang til filer vil blive logget hvis <a href="opt.html#FileLog">
+FileLog</a> valgmuligheden er aktiveret. Denne feature vil v&aelig;re meget 
+brugbar til at analysere hvordan et installeret program tilg&aring;r disken 
+med henblik p&aring; debugging og optimering. Den f&oslash;lgende resload funktion 
+vil generere et punkt i log filen:
+<ul>
+<li><a href="../autodoc.html#resload_DeleteFile">resload_DeleteFile</a>
+<li><a href="../autodoc.html#resload_DiskLoad">resload_DiskLoad</a>
+<li><a href="../autodoc.html#resload_Examine">resload_Examine</a>
+<li><a href="../autodoc.html#resload_ExNext">resload_ExNext</a>
+<li><a href="../autodoc.html#resload_GetFileSize">resload_GetFileSize</a>
+<li><a href="../autodoc.html#resload_GetFileSizeDec">resload_GetFileSizeDec</a>
+<li><a href="../autodoc.html#resload_ListFiles">resload_ListFiles</a>
+<li><a href="../autodoc.html#resload_LoadFile">resload_LoadFile</a>
+<li><a href="../autodoc.html#resload_LoadFileDecrunch">resload_LoadFileDecrunch</a>
+<li><a href="../autodoc.html#resload_LoadFileOffset">resload_LoadFileOffset</a>
+<li><a href="../autodoc.html#resload_SaveFile">resload_SaveFile</a>
+<li><a href="../autodoc.html#resload_SaveFileOffset">resload_SaveFileOffset</a>
+</ul>
+Hver fil tilgang der g&oslash;r brug af funktionerne herover genererer en linie i logfilen, 
+linien identificerer den kaldte funktion, en crc af den læste/skrevne data, parametrene og resultatet. WHDLoad
+vil samle log resultaterne ind i en intern buffer. Bufferen vil blive flushed ved 
+afslutning eller n&aring;r en fil tilg&aring;s hvis bufferen er fyldt. Informationen vil blive 
+skrevet til en ASCII fil, der vil f&aring; navnet ".whdl_filelog", standard vil den blive 
+lagt i "PROGDIR:" men kan blive &aelig;ndret v.h.a. <a href="opt.html#CoreDumppath">
+CoreDumpPath</a> ops&aelig;tningsmuligheden.
+</BODY>
+</HTML>

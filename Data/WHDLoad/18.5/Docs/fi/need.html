@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>Vaatimukset</TITLE>
+<meta name="DC.Language" content="fi">
+<meta http-equiv="content-language" content="fi">
+<meta http-equiv="content-type" content="text/html; charset=Windows-1252"><!-- $Id: need.html 1.5 2014/12/04 23:37:38 wepl Exp wepl $ --></HEAD>
+<BODY>
+<h3>Vaatimukset</h3>
+<h4>... asennettujen ohjelmien ajoon:</h4>
+<ul>
+<li>68000-suoritin (68010+ suositellaan, koska jotkut asennusohjelmat vaativat VBR:n lopetusn&auml;pp&auml;intoimintoon)<li>Kickstart 2.0 (versio 37)<li>v&auml;hint&auml;&auml;n 1 Mt RAM (toisinaan enemm&auml;n, riippuu asennetusta ohjelmasta)</ul>
+
+<h5>Kickstart-emulointi</h5>
+<p>Jotkin asennusohjelmat k&auml;ytt&auml;v&auml;t ns. <cite>kickemua</cite> luomaan asennetulle ohjelmalle t&auml;ydellisen AmigaOS-ymp&auml;rist&ouml;n. T&auml;llainen <cite>kickemu</cite> vaatii alkuper&auml;isen kickstart-muistinkuvan. T&auml;m&auml; muistinkuva voidaan tallentaa oikeasta Amigasta aminetist&auml; l&ouml;ytyv&auml;ll&auml; <cite>GrabKick</cite>-ty&ouml;kalulla tai vastaavalla (varmista, ett&auml; <a href="bugs.html">levyjen asetukset ovat oikeat (MaxTransfer, Mask)</a> tai muistinkuva voi vioittua). Tarvittava kuvan versio vaatii asennetusta ohjelmasta. Tietoa tarvittavasta kuvatiedostosta on yleens&auml; mukana toimitetussa <i>ReadMe</i>-tiedostossa. Kickstart-versioiden 1.2 ja 1.3 kuva voidaan saada vain A500:sta, versio 3.1 voidaan saada A500/A600/A2000:sta, A1200:sta tai A4000:sta, jossa on Kick3.1 ROM. Jos WHDLoad ei l&ouml;yd&auml; muistinkuvaa tai se on v&auml;&auml;r&auml; versio tai muokattu, WHDLoad sulkeutuu ja antaa oikean virheilmoituksen. Lis&auml;ksi tarvitaan Kickstart-muistinkuvaa vastaava uudelleensijoitustiedosto, jonka p&auml;&auml;te on <tt>.RTB</tt> . Uudelleensijoitustiedosto on Aminetiss&auml; paketissa <a href="http://aminet.net/package/util/boot/skick346.lha">util/boot/skick346.lha</a>. Sek&auml; kickstart-kuva ett&auml; uudelleensijoitustiedosto tulee sijoittaa hakemistoon <i>Devs:Kickstarts/</i> oikealla nimell&auml;. Alkaen WHDLoad-versiosta 17.0 tiedostot voivat olla my&ouml;s hakemistossa <i>WHDCOMMON:</i>. Alla olevassa taulukossa on lueteltu tiedostojen nimet kickstart-version mukaisesti:</p>Alkaen WHDLoad-versiosta 16.5 voidaan k&auml;ytt&auml;&auml; my&ouml;s Cloanto Amiga Forever -CD:iden kickstart-muistinkuvia. Kuvat tulee nimet&auml; alla olevan taulukon mukaisesti. Lis&auml;ksi tiedosto <i>rom.key</i> on kopioitava hakemistoon <i>Devs:Kickstarts/</i> tai <i>WHDCOMMON:</i>. Jotkut vanhemmat asennusohjelmat vaativat tiedoston kick40068.A1200, ja ne eiv&auml;t toimi Cloanton ROMeilla.<br> Amiga Forever 2008 sis&auml;lt&auml;&auml; my&ouml;s tiedoston kick40068.A1200, ja muistinkuvat kopioidaan automaattisesti oikeisiin paikkoihin.<br> Amiga Forever 2011 sis&auml;lt&auml;v&auml;t my&ouml;s rom-tiedostot kick33180.A500 ja kick40063.A600. N&auml;m&auml; rom-tiedostot vaativat WHDLoad-version 17.0 toimiakseen.<p>
+
+<table border=1 cellpadding=3><tr>
+	<th rowspan=2>Versio</th>
+	<th rowspan=2>Kickstart-muistinkuvan nimi</th>
+	<th rowspan=2>Uudelleensijoitustiedoston nimi</th>
+	<th colspan=4>Cloanton &apos;Amiga Forever&apos; -tiedostonimet</th>
+</tr><tr>
+	<th>release 3.0 (1999)</th>
+	<th>release 6.1 (2005)</th>
+	<th>release 6.7 (2011)</th>
+	<th>release 7.0 (2014)</th>
+</tr><tr>
+	<td align=center>1.2</td>
+	<td>Devs:Kickstarts/kick33180.A500</td>
+	<td>Devs:Kickstarts/kick33180.A500.RTB</td>
+	<td></td>
+	<td></td>
+	<td align=center colspan=2>amiga-os-120.rom</td>
+</tr><tr>
+	<td align=center>1.3</td>
+	<td>Devs:Kickstarts/kick34005.A500</td>
+	<td>Devs:Kickstarts/kick34005.A500.RTB</td>
+	<td align=center>kick130.rom</td>
+	<td align=center colspan=3>amiga-os-130.rom</td>
+</tr><tr>
+	<td align=center rowspan=3>3.1</td>
+	<td>Devs:Kickstarts/kick40063.A600</td>
+	<td>Devs:Kickstarts/kick40063.A600.RTB</td>
+	<td></td>
+	<td></td>
+	<td align=center>amiga-os-310-a500.rom</td>
+	<td align=center>amiga-os-310-a600.rom</td>
+</tr><tr>
+	<td>Devs:Kickstarts/kick40068.A1200</td>
+	<td>Devs:Kickstarts/kick40068.A1200.RTB</td>
+	<td></td>
+	<td></td>
+	<td align=center colspan=2>amiga-os-310-a1200.rom</td>
+</tr><tr>
+	<td>Devs:Kickstarts/kick40068.A4000</td>
+	<td>Devs:Kickstarts/kick40068.A4000.RTB</td>
+	<td align=center>kick310.rom</td>
+	<td align=center colspan=2>amiga-os-310.rom</td>
+	<td align=center>amiga-os-310-a4000.rom</td>
+</tr></table>
+
+<h4>valinnaiset paketit:</h4>
+<ul>
+
+<li>Kickstart 3.1 (versio 40) korjaa muutamia aiempien versioiden ongelmia ja tarjoaa uusia ominaisuuksia, joita WHDLoad k&auml;ytt&auml;&auml;, mik&auml;li ne ovat k&auml;ytett&auml;viss&auml;; esim. MemoryPool parantaa suorituskyky&auml;, jos asennettu ohjelma k&auml;ytt&auml;&auml; useita tiedostoja<li>XPK-pakattujen datatiedostojen k&auml;ytt&ouml;&auml; varten on asennettava XPK-kirjastot, jotka l&ouml;ytyv&auml;t <a
+href="http://aminet.net/package/util/pack/xpk_User">aminetist&auml;</a>. Kaikki datatiedostot voidaan pakata XPK:lla, jolloin WHDLoad purkaa ne latauksen aikana. XPK-purku vaatii ylim&auml;&auml;r&auml;ist&auml; muistia, mink&auml; vuoksi sit&auml; pit&auml;&auml; k&auml;ytt&auml;&auml; varovasti, jos j&auml;rjestelm&auml;ss&auml; on v&auml;h&auml;n muistia. WHDLoad ei pakkaa kirjoittamiaan tiedostoja<li>joissakin asennusohjelmissa k&auml;ytet&auml;&auml;n automaattiseen kielen valintaan lowlevel.librarya. T&auml;m&auml; kirjasto on osa Workbench 3.1:&auml;, mutta se voidaan asentaa my&ouml;s aiempiin OS-versioihin laajennuksena. Jos lowlevel.library ei ole k&auml;ytett&auml;viss&auml;, asennusohjelmat k&auml;ytt&auml;v&auml;t englantia<li>jos reqtools.library on asennettuna, WHDLoad k&auml;ytt&auml;&auml; sit&auml; kehoteikkunoiden n&auml;ytt&auml;miseen. Reqtools mahdollistaa esimerkiksi sen m&auml;&auml;ritt&auml;misen, mihin kehotteet ilmestyv&auml;t, ja se voidaan ladata <a
+href="http://aminet.net/package/util/libs/ReqToolsUsr.lha">aminetist&auml;</a></ul>
+
+<h4>... uusien Slave-tiedostojen / asennusohjelmien laatimiseen:</h4>
+<ul>
+<li>68030-suoritinta tai nopeampaa ja MMU:ta, jotta kaikkia WHDLoadin ominaisuuksia voidaan k&auml;ytt&auml;&auml; (kunnon kone on aina hyv&auml; valinta ohjelmistokehitykseen ;-))<li>tuntemusta konekielest&auml;, assemblerist&auml;, Amiga-laitteistosta...<li>assembler-ohjelmaa (optimoivaa)<li>joistakin muista ty&ouml;kaluista on hy&ouml;ty&auml; (hexedit, disasm, ...)<li>muutama lis&auml;mega muistia<li>p&auml;&auml;sy erilaisille koneille testausta varten (68000 - 68060, OCS, AGA, n&auml;ytt&ouml;kortti)<li>laitteisto- tai ohjelmistoj&auml;&auml;dytt&auml;j&auml; kuiten AR3, HRTmon, TK<li>NMI-painike, jolla voidaan keskeytt&auml;&auml; k&auml;ynniss&auml; oleva ohjelma ja siirty&auml; ohjelmistomonitoriin/j&auml;&auml;dytt&auml;j&auml;&auml;n</ul>
+</BODY>
+</HTML>

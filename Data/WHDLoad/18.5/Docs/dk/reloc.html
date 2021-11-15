@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>Reloc * Relokere eksekverbare</TITLE>
+<meta name="DC.Language" content="dk">
+<meta http-equiv="content-language" content="dk">
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<!-- $Id: reloc.html 1.2 2009/02/05 20:38:15 wepl Exp wepl $ -->
+</HEAD>
+<BODY>
+<h3>Reloc * Relokere eksekverbare</h3>
+Et lille v&aelig;rkt&oslash;j til at relokere en standard AmigaDOS eksekverbar til en absolut 
+adresse og gemme denne som en simpel data fil. Dette var p&aring;kr&aelig;vet af tidligere 
+WHDLoad versioner for at h&aring;ndtere AmigaDOS eksekverbare. Startende med WHDLoad 
+version 8.0, kan funktionen <a href="../autodoc.html">resload_Relocate
+</a> bruges istedet.
+<h4>Installation</h4>
+Reloc findes kun i <tt>DEV</tt> arkivet, ikke i <TT>USR</tt> arkivet
+<br>kopi&eacute;r den til C: eller et lignende sted
+<h4>indstillinger</h4>
+<table>
+<tr>
+<td colspan=2><tt>INPUTFILE/A,OUTPUTFILE,ADR/K,QUIET/S</tt></td></tr>
+<tr>
+<td valign=top nowrap><tt>INPUTFILE/A</tt>&nbsp;&nbsp;</td>
+<td>den eksekverbare fil som skal relokeres. Skal specificeres.</td>
+</tr>
+<tr>
+<td valign=top><tt>OUTPUTFILE</tt></td>
+<td>Navnet p&aring; den fil der skal skrives. Hvis denne ikke er specificeret 
+overskrives kilde filen</td>
+</tr>
+<tr>
+<td valign=top><tt>ADR/K</tt></td>
+<td>Start adressen for den relokerede fil. Hvis denne ikke er specificeret bruges $400. 
+Du kan bruge simple udtryk som "$5000" = "20480" = " -$Ff +-33+
+19512+$4e8" (prefix "$" for hexadecimale numre, underst&oslash;ttede operatorer er "+" og "-", 
+unary og binary)</td>
+</tr>
+<tr>
+<td valign=top><tt>QUIET/S</tt></td>
+<td>Sl&aring;r alle informationer fra, undtagen fejl beskeder. Sl&aring; denne til for brug i 
+forbindelse med installeren</td>
+</tr>
+</table>
+<h4>Retur kode</h4>
+Retur koden er sat til 0 hvis alt er OK, ellers 10.
+<h4>Baggrund</h4>
+HUNK'ene fra den eksekverbare kopieres i den samme r&aelig;kkef&oslash;lge til den absolutte fil. 
+BSS-HUNK's bl&aelig;ses op til deres rigtige st&oslash;rrelse. HUNK's der blev introduceret med 
+AmigaDOS 2.0 (f.eks. RELOC32_SHORT) er ikke underst&oslash;ttet.
+</BODY>
+</HTML>
