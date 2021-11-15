@@ -13,35 +13,35 @@ on:
 jobs:
   Any_Any:
     runs-on: ubuntu-18.04
-    steps:
 
+    env:
+      UPLOAD_ENABLED: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+
+    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Log environment
-        run: env
-
-      - name: Install additional tools
+      - name: Install extra packages
         run: >-
           sudo apt install
           dos2unix
-          gettext
 
       - name: Update version
         run: |
-          fsbuild/version --update
+          fsbuild/version
 
       - name: Bootstrap
-        run: fsbuild/bootstrap
+        run: |
+          fsbuild/bootstrap
 
       - name: Build
         run: |
-          pipenv run fsbuild/build
+          fsbuild/build
 
       - name: Bundle
         run: |
-          pipenv run fsbuild/bundle
+          fsbuild/bundle
 
       - name: Archive
         run: |
@@ -54,12 +54,15 @@ jobs:
 
       - name: Upload build to Dropbox folder
         if: >-
-          github.ref == 'refs/heads/master' ||
-          github.ref == 'refs/heads/beta' ||
-          github.ref == 'refs/heads/stable'
-        run: |
-          python3 -m pip install dropbox
-          fsbuild/upload
+          env.UPLOAD_ENABLED != null && (
+            github.ref == 'refs/heads/master' ||
+            github.ref == 'refs/heads/dev' ||
+            github.ref == 'refs/heads/beta' ||
+            github.ref == 'refs/heads/stable'
+          )
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+        run: |
+          python3 -m pip install dropbox==11.23.0
+          fsbuild/upload
